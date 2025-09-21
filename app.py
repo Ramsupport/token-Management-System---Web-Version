@@ -72,7 +72,17 @@ def index():
     """Main dashboard page"""
     return render_template('index.html')
 
+# vvv ADD THIS CODE BLOCK HERE vvv
+@app.route('/health')
+def health():
+    """Health check endpoint for Railway"""
+    return jsonify({'status': 'healthy'})
+# ^^^ ADD THIS CODE BLOCK HERE ^^^
+
 @app.route('/api/tokens', methods=['GET', 'POST'])
+def handle_tokens():
+    """API endpoint for token operations"""
+    if request.method == 'GET':
 def handle_tokens():
     """API endpoint for token operations"""
     if request.method == 'GET':
