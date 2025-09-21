@@ -1242,9 +1242,9 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // Configuration for API connection
+        // Configuration for API connection (default to local mode: endpoint empty)
         let apiConfig = {
-            endpoint: 'https://your-api-endpoint.com/api',
+            endpoint: '',
             database: 'token_management',
             apiKey: ''
         };
@@ -1273,6 +1273,23 @@
                 const arr = raw ? JSON.parse(raw) : [];
                 return Array.isArray(arr) ? arr : [];
             } catch { return []; }
+        }
+
+        // Determine if API is configured
+        function isApiConfigured() {
+            const ep = (apiConfig && apiConfig.endpoint || '').trim();
+            if (!ep) return false;
+            if (/your-api-endpoint\.com/i.test(ep)) return false; // placeholder
+            return /^https?:\/\//i.test(ep) || ep.startsWith('/');
+        }
+
+        // Sanitize apiConfig after any load/merge so placeholder endpoints don't trigger fetches
+        function sanitizeApiConfig() {
+            if (!apiConfig || typeof apiConfig !== 'object') apiConfig = {};
+            const ep = (apiConfig.endpoint || '').trim();
+            if (!ep || /your-api-endpoint\.com/i.test(ep)) {
+                apiConfig.endpoint = '';
+            }
         }
         function setLocalTokens(tokens) {
             localStorage.setItem(TOKENS_STORAGE_KEY, JSON.stringify(tokens || []));
@@ -1362,6 +1379,7 @@
             if (stored) {
                 try { apiConfig = { ...apiConfig, ...JSON.parse(stored) }; } catch {}
             }
+            sanitizeApiConfig();
         })();
 
         // Load users from localStorage if available
@@ -1409,6 +1427,10 @@
 
         // API functions for database operations
         async function apiRequest(endpoint, method = 'GET', data = null) {
+            // If API not configured, fail fast and let callers use local fallback without UI popup
+            if (!isApiConfigured()) {
+                throw new Error('API not configured');
+            }
             try {
                 const url = `${apiConfig.endpoint}${endpoint}`;
                 const options = {
@@ -1424,15 +1446,16 @@
                 }
 
                 const response = await fetch(url, options);
-                
                 if (!response.ok) {
                     throw new Error(`API request failed with status ${response.status}`);
                 }
-
                 return await response.json();
             } catch (error) {
                 console.error('API request error:', error);
-                showApiStatus('API request failed: ' + error.message, false);
+                // Only show a popup if an API really is configured
+                if (isApiConfigured()) {
+                    showApiStatus('API request failed: ' + error.message, false);
+                }
                 throw error;
             }
         }
@@ -1560,6 +1583,22 @@
                 loadingSpinner.classList.remove('d-none');
             }
             
+            // If API not configured, skip network and use local/sample silently
+            if (!isApiConfigured()) {
+                const localTokensRaw = localStorage.getItem(TOKENS_STORAGE_KEY);
+                let fallbackData = [];
+                if (localTokensRaw) { try { fallbackData = JSON.parse(localTokensRaw); } catch {} }
+                if (!Array.isArray(fallbackData) || fallbackData.length === 0) {
+                    fallbackData = [
+                        { id: 1, date: '2023-05-15', location: 'India', subLocation: 'Mumbai', token: 'TKN001', client_name: 'John Doe', status: 'Completed', charges: 500, amount_due: 0, agent_name: 'Agent1', executive_name: 'Ramnath' },
+                        { id: 2, date: '2023-05-16', location: 'International', subLocation: 'USA', token: 'TKN002', client_name: 'Jane Smith', status: 'Not Completed', charges: 750, amount_due: 750, agent_name: 'Agent2', executive_name: 'Ramnath' }
+                    ];
+                }
+                tokenDataCache = fallbackData;
+                refreshTokensTableFromCache();
+                showApiStatus(Array.isArray(localTokensRaw) ? 'Using locally saved tokens.' : 'Using sample data. Configure API connection to use your database.', false);
+                return;
+            }
             try {
                 // Fetch data from API
                 const data = await apiRequest('/tokens');
@@ -1708,6 +1747,37 @@
                 processBy: document.getElementById('processBy').value
             };
 
+            // If API not configured, use local save path directly
+            if (!isApiConfigured()) {
+                let tokens = getLocalTokens();
+                const tokenId = document.getElementById('tokenId').value;
+                const normalized = {
+                    id: tokenId ? parseInt(tokenId, 10) : undefined,
+                    date: tokenData.date,
+                    location: tokenData.location,
+                    subLocation: tokenData.subLocation,
+                    token: tokenData.token,
+                    client_name: tokenData.clientName,
+                    status: tokenData.status,
+                    charges: tokenData.charges,
+                    amount_due: tokenData.amountDue,
+                    agent_name: tokenData.agentName,
+                    executive_name: tokenData.executiveName
+                };
+                if (normalized.id) {
+                    const idx = tokens.findIndex(t => t.id === normalized.id);
+                    if (idx !== -1) tokens[idx] = { ...tokens[idx], ...normalized }; else tokens.push(normalized);
+                } else {
+                    const nextId = tokens.length > 0 ? Math.max(...tokens.map(t => t.id || 0)) + 1 : 1;
+                    normalized.id = nextId;
+                    tokens.push(normalized);
+                }
+                setLocalTokens(tokens);
+                refreshTokensTableFromCache();
+                resetForm();
+                showApiStatus('Token saved locally (no backend).', true);
+                return;
+            }
             try {
                 if (tokenId) {
                     // Update existing token
@@ -1832,6 +1902,14 @@
         // Function to delete token
         async function deleteToken(id) {
             if (!confirm('Are you sure you want to delete this token?')) return;
+            // If API not configured, delete locally
+            if (!isApiConfigured()) {
+                const tokens = getLocalTokens().filter(t => t.id !== id);
+                setLocalTokens(tokens);
+                refreshTokensTableFromCache();
+                showApiStatus('Token deleted locally (no backend).', true);
+                return;
+            }
             try {
                 await apiRequest(`/tokens/${id}`, 'DELETE');
                 showApiStatus('Token deleted successfully!', true);
@@ -1845,32 +1923,7 @@
                 localStorage.setItem(TOKENS_STORAGE_KEY, JSON.stringify(newList));
                 tokenDataCache = newList;
                 // Refresh UI from cache
-                const tableBody = document.getElementById('dataTableBody');
-                tableBody.innerHTML = '';
-                tokenDataCache.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.id}</td>
-                        <td>${formatDate(item.date)}</td>
-                        <td>${item.location}</td>
-                        <td>${item.token}</td>
-                        <td>${item.client_name}</td>
-                        <td>${item.status}</td>
-                        <td class=\"admin-only-column user-only-column\" style=\"display: none;\">${item.charges || 0}</td>
-                        <td class=\"admin-only-column user-only-column agent-only-column\" style=\"display: none;\">${item.amount_due || 0}</td>
-                        <td>${item.agent_name || ''}</td>
-                        <td>${item.executive_name || ''}</td>
-                        <td>
-                            <button class=\"btn btn-sm btn-outline-primary\" onclick=\"editToken(${item.id})\">
-                                <i class=\"fas fa-edit\"></i>
-                            </button>
-                            <button class=\"btn btn-sm btn-outline-danger\" onclick=\"deleteToken(${item.id})\">
-                                <i class=\"fas fa-trash\"></i>
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
+                refreshTokensTableFromCache();
                 showApiStatus('Token deleted locally (no backend).', true);
             }
         }
