@@ -2,6 +2,8 @@
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
 import sqlite3
 import os
+import psycopg2
+from psycopg2.extras import DictCursor # Important for dictionary-like rows
 import datetime
 import csv
 import io
@@ -14,18 +16,21 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-fo
 DATABASE_PATH = os.environ.get('DATABASE_PATH', 'tokens.db')
 
 def get_db_connection():
-    """Establishes a connection to the database."""
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
+    """Establishes a connection to the PostgreSQL database."""
+    conn = psycopg2.connect(
+        os.environ.get('DATABASE_URL'),
+        cursor_factory=DictCursor # This makes rows behave like dictionaries
+    )
     return conn
 
 def init_database():
-    """Initializes the database and creates the 'tokens' table if it doesn't exist."""
+    """Initializes the PostgreSQL database and creates the 'tokens' table if it doesn't exist."""
     conn = get_db_connection()
     cursor = conn.cursor()
+    # Notice CREATE TABLE syntax is slightly different
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tokens (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             date TEXT,
             location TEXT,
             sub_location TEXT,
@@ -51,8 +56,10 @@ def init_database():
         );
     """)
     conn.commit()
+    cursor.close()
     conn.close()
-    print("Database has been initialized.")
+    print("PostgreSQL Database has been initialized.")
+
 
 # Initialize the database when the app starts
 init_database()
