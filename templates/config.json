@@ -1,4 +1,4 @@
 {
-  "endpoint": "https://your-api-endpoint.com/api",
+  "endpoint": "",
   "database": "token_management"
 }
