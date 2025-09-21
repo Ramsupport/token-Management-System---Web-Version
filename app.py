@@ -142,46 +142,52 @@ def handle_tokens():
         
         return jsonify([dict(token) for token in tokens])
     
-    elif request.method == 'POST':
-        # Add new token
-        data = request.json
-        conn = get_db_connection()
+    # Inside the @app.route('/api/tokens', methods=['GET', 'POST']) function...
+
+elif request.method == 'POST':
+    # Add new token
+    data = request.json
+    conn = get_db_connection()
+    
+    try:
+        charges = float(data.get('charges', 0))
+        payment_received = float(data.get('payment_received', 0))
+        charges_to_executive = float(data.get('charges_to_executive', 0))
+    except (ValueError, TypeError):
+        charges = payment_received = charges_to_executive = 0
         
-        # Calculate amount_due and margin
-        try:
-            charges = float(data.get('charges', 0))
-            payment_received = float(data.get('payment_received', 0))
-            charges_to_executive = float(data.get('charges_to_executive', 0))
-        except (ValueError, TypeError):
-            charges = payment_received = charges_to_executive = 0
-            
-        amount_due = charges - payment_received
-        margin = charges - charges_to_executive
-        
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO tokens (
-                date, location, sub_location, token, password, client_name, contact,
-                who_will_ship, contacted_client, status, forwarded, charges,
-                payment_received, amount_due, agent_name, executive_name,
-                charges_to_executive, margin, process_by, completion_date,
-                agent_payment_applied, executive_payment_applied
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('date'), data.get('location'), data.get('sub_location'),
-            data.get('token'), data.get('password'), data.get('client_name'),
-            data.get('contact'), data.get('who_will_ship'), data.get('contacted_client'),
-            data.get('status'), data.get('forwarded'), data.get('charges'),
-            data.get('payment_received'), str(amount_due), data.get('agent_name'),
-            data.get('executive_name'), data.get('charges_to_executive'), str(margin),
-            data.get('process_by'), data.get('completion_date'), 'no', 'no'
-        ))
-        
-        token_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True, 'id': token_id})
+    amount_due = charges - payment_received
+    margin = charges - charges_to_executive
+    
+    cursor = conn.cursor()
+    # Note all the '?' have been changed to '%s'
+    cursor.execute("""
+        INSERT INTO tokens (
+            date, location, sub_location, token, password, client_name, contact,
+            who_will_ship, contacted_client, status, forwarded, charges,
+            payment_received, amount_due, agent_name, executive_name,
+            charges_to_executive, margin, process_by, completion_date,
+            agent_payment_applied, executive_payment_applied
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
+    """, (
+        data.get('date'), data.get('location'), data.get('sub_location'),
+        data.get('token'), data.get('password'), data.get('client_name'),
+        data.get('contact'), data.get('who_will_ship'), data.get('contacted_client'),
+        data.get('status'), data.get('forwarded'), str(charges),
+        str(payment_received), str(amount_due), data.get('agent_name'),
+        data.get('executive_name'), str(charges_to_executive), str(margin),
+        data.get('process_by'), data.get('completion_date'), 'no', 'no'
+    ))
+    
+    # Get the ID of the new row using fetchone()
+    token_id = cursor.fetchone()[0]
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'success': True, 'id': token_id}))
 
 @app.route('/api/tokens/<int:token_id>', methods=['PUT', 'DELETE'])
 def handle_token(token_id):
