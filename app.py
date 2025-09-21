@@ -13,6 +13,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-fo
 # Database configuration
 DATABASE_PATH = os.environ.get('DATABASE_PATH', 'tokens.db')
 
+# vvv ADD THIS LINE HERE vvv
+init_database()
+# ^^^ ADD THIS LINE HERE ^^^
+
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
