@@ -187,8 +187,8 @@ elif request.method == 'POST':
     cursor.close()
     conn.close()
     
-    return jsonify({'success': True, 'id': token_id}))
-
+    return jsonify({'success': True, 'id': token_id})
+    
 @app.route('/api/tokens/<int:token_id>', methods=['PUT', 'DELETE'])
 def handle_token(token_id):
     """API endpoint for individual token operations"""
