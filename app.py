@@ -13,68 +13,58 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-fo
 # Database configuration
 DATABASE_PATH = os.environ.get('DATABASE_PATH', 'tokens.db')
 
-# vvv ADD THIS LINE HERE vvv
-init_database()
-# ^^^ ADD THIS LINE HERE ^^^
-
 def get_db_connection():
+    """Establishes a connection to the database."""
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_database():
-    """Initialize the database with required tables"""
+    """Initializes the database and creates the 'tokens' table if it doesn't exist."""
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    # Create tokens table
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS tokens (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT,
-        location TEXT,
-        sub_location TEXT,
-        token TEXT,
-        password TEXT,
-        client_name TEXT,
-        contact TEXT,
-        who_will_ship TEXT,
-        contacted_client TEXT,
-        status TEXT,
-        forwarded TEXT,
-        charges TEXT,
-        payment_received TEXT,
-        amount_due TEXT,
-        agent_name TEXT,
-        executive_name TEXT,
-        charges_to_executive TEXT,
-        margin TEXT,
-        process_by TEXT,
-        completion_date TEXT,
-        agent_payment_applied TEXT,
-        executive_payment_applied TEXT
-    )
+        CREATE TABLE IF NOT EXISTS tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            location TEXT,
+            sub_location TEXT,
+            token TEXT,
+            password TEXT,
+            client_name TEXT,
+            contact TEXT,
+            who_will_ship TEXT,
+            contacted_client TEXT,
+            status TEXT,
+            forwarded TEXT,
+            charges TEXT,
+            payment_received TEXT,
+            amount_due TEXT,
+            agent_name TEXT,
+            executive_name TEXT,
+            charges_to_executive TEXT,
+            margin TEXT,
+            process_by TEXT,
+            completion_date TEXT,
+            agent_payment_applied TEXT,
+            executive_payment_applied TEXT
+        );
     """)
-    
-    # Create charger_list table
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS charger_list (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        location TEXT NOT NULL,
-        city_or_country TEXT NOT NULL,
-        charges TEXT NOT NULL,
-        agent TEXT,
-        executive TEXT
-    )
-    """)
-    
     conn.commit()
     conn.close()
+    print("Database has been initialized.")
+
+# Initialize the database when the app starts
+init_database()
+
+# --- Your Flask Routes (@app.route) would go below this line ---
 
 @app.route('/')
 def index():
     """Main dashboard page"""
     return render_template('index.html')
+
+# ... (rest of your code)
 
 # vvv ADD THIS CODE BLOCK HERE vvv
 @app.route('/health')
