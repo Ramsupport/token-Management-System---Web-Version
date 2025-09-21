@@ -87,9 +87,6 @@ def health():
 def handle_tokens():
     """API endpoint for token operations"""
     if request.method == 'GET':
-def handle_tokens():
-    """API endpoint for token operations"""
-    if request.method == 'GET':
         # Get tokens with optional filtering
         conn = get_db_connection()
         
