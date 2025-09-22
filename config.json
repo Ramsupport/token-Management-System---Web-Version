@@ -1,4 +1,5 @@
 {
   "endpoint": "/api",
-  "database": "railway"
+  "database": "token_management",
+  "apiKey": ""
 }
