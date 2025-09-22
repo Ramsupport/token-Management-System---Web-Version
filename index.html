@@ -56,6 +56,11 @@
         .card-body {
             padding: 1.5rem;
         }
+        
+        /* FIX: Prevents content from shifting down on tab change */
+        .tab-pane .card {
+            margin-top: 0;
+        }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -205,16 +210,10 @@
             background-color: var(--warning-color);
         }
 
-        /* Fix spacing issues */
-        .settings-section {
-            margin-bottom: 0;
-        }
-
         .settings-section .card {
             margin-bottom: 1rem;
         }
 
-        /* Remove extra spacing in cards */
         .card .row {
             margin-bottom: 0.75rem;
         }
@@ -223,12 +222,10 @@
             margin-bottom: 0;
         }
 
-        /* Compact form layout */
         .mb-3 {
             margin-bottom: 1rem !important;
         }
 
-        /* Summary cards styling */
         .summary-card {
             border: 1px solid #dee2e6;
             border-radius: 8px;
@@ -271,7 +268,6 @@
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
         <div class="card login-card">
             <div class="card-header text-center">
@@ -308,9 +304,7 @@
         </div>
     </div>
 
-    <!-- Main Application -->
     <div id="mainApp" style="display: none;">
-        <!-- Navigation -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">
@@ -345,9 +339,7 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
         <div class="container-fluid mt-4">
-            <!-- Tab Navigation -->
             <ul class="nav nav-pills mb-4 justify-content-center" id="mainTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="data-tab" data-bs-toggle="pill" data-bs-target="#data-content" type="button">
@@ -381,12 +373,9 @@
                 </li>
             </ul>
 
-            <!-- Tab Content -->
             <div class="tab-content" id="mainTabContent">
-                <!-- Data Management Tab -->
                 <div class="tab-pane fade show active" id="data-content">
                     <div class="row">
-                        <!-- Add/Edit Form -->
                         <div class="col-12 col-lg-4">
                             <div class="card">
                                 <div class="card-header">
@@ -558,7 +547,6 @@
                             </div>
                         </div>
 
-                        <!-- Data Table -->
                         <div class="col-12 col-lg-8">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -573,7 +561,6 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <!-- Search and Filters -->
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <div class="input-group">
@@ -630,7 +617,6 @@
                     </div>
                 </div>
 
-                <!-- Token Filter Tab -->
                 <div class="tab-pane fade" id="filter-content">
                     <div class="card">
                         <div class="card-header">
@@ -726,7 +712,6 @@
                     </div>
                 </div>
 
-                <!-- Agent Reports Tab -->
                 <div class="tab-pane fade admin-only user-only agent-only" id="agent-content">
                     <div class="card">
                         <div class="card-header">
@@ -806,7 +791,6 @@
                     </div>
                 </div>
 
-                <!-- Executive Reports Tab -->
                 <div class="tab-pane fade admin-only executive-only" id="executive-content">
                     <div class="card">
                         <div class="card-header">
@@ -886,7 +870,6 @@
                     </div>
                 </div>
 
-                <!-- Profit Analysis Tab -->
                 <div class="tab-pane fade admin-only" id="profit-content">
                     <div class="card">
                         <div class="card-header">
@@ -1027,7 +1010,6 @@
                     </div>
                 </div>
 
-                <!-- Settings Tab -->
                 <div class="tab-pane fade admin-only" id="settings-content">
                     <div class="row">
                         <div class="col-md-6">
@@ -1082,14 +1064,6 @@
                                         <label class="form-label">Currency Symbol</label>
                                         <input type="text" class="form-control" id="currencySymbol" value="₹">
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Auto Backup Interval (minutes)</label>
-                                        <input type="number" class="form-control" id="backupInterval" value="30" min="5">
-                                    </div>
-                                    <div class="form-check form-switch mb-3">
-                                        <input class="form-check-input" type="checkbox" id="autoBackupEnabled" checked>
-                                        <label class="form-check-label" for="autoBackupEnabled">Enable Auto Backup</label>
-                                    </div>
                                     <button class="btn btn-primary" onclick="saveSystemSettings()">
                                         <i class="fas fa-save me-2"></i>Save Settings
                                     </button>
@@ -1105,44 +1079,21 @@
                                 <div class="card-body">
                                     <div class="row mb-3">
                                         <div class="col-6">
-                                            <button class="btn btn-success w-100 mb-2" onclick="exportAllData()">
-                                                <i class="fas fa-download me-2"></i>Export All Data (CSV)
+                                            <button class="btn btn-success w-100 mb-2" onclick="createBackup()">
+                                                <i class="fas fa-download me-2"></i>Create Backup
                                             </button>
                                         </div>
                                         <div class="col-6">
                                             <button class="btn btn-info w-100 mb-2" onclick="importData()">
-                                                <i class="fas fa-upload me-2"></i>Import Data
+                                                <i class="fas fa-upload me-2"></i>Import / Restore
                                             </button>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <div class="col-6">
-                                            <button class="btn btn-warning w-100 mb-2" onclick="createBackup()">
-                                                <i class="fas fa-copy me-2"></i>Create Backup
-                                            </button>
-                                        </div>
-                                        <div class="col-6">
+                                        <div class="col-12">
                                             <button class="btn btn-danger w-100 mb-2" onclick="clearAllData()">
                                                 <i class="fas fa-trash me-2"></i>Clear All Data
                                             </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Backup History</label>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Date</th>
-                                                        <th>Size</th>
-                                                        <th>Status</th>
-                                                        <th>Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="backupHistory">
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -1162,23 +1113,17 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="summary-card">
-                                                <div class="summary-value" id="appVersion">1.0.0</div>
+                                                <div class="summary-value" id="appVersion">1.1.0</div>
                                                 <div class="summary-label">App Version</div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Last Backup</label>
-                                        <div class="alert alert-info" id="lastBackupInfo">
-                                            No backups created yet
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
                                         <label class="form-label">Storage Usage</label>
                                         <div class="progress mb-2">
-                                            <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                                            <div class="progress-bar" id="storageProgressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                                         </div>
-                                        <small class="text-muted">Approximately 250KB of 1MB used</small>
+                                        <small class="text-muted" id="storageUsageText">Calculating...</small>
                                     </div>
                                     <button class="btn btn-outline-primary w-100" onclick="showAbout()">
                                         <i class="fas fa-info-circle me-2"></i>About This Application
@@ -1192,7 +1137,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div class="modal fade" id="aboutModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -1202,15 +1146,15 @@
                 </div>
                 <div class="modal-body">
                     <p>This application helps manage token data for biometric services.</p>
-                    <p><strong>Version:</strong> 1.0.0</p>
+                    <p><strong>Version:</strong> 1.1.0</p>
                     <p><strong>Features:</strong></p>
                     <ul>
                         <li>Token data management</li>
                         <li>Agent and executive reporting</li>
                         <li>Profit analysis</li>
-                        <li>CSV data export/import</li>
+                        <li>CSV and JSON data export/import</li>
                         <li>User management</li>
-                        <li>Automatic backups</li>
+                        <li>File-based backups</li>
                     </ul>
                 </div>
                 <div class="modal-footer">
@@ -1226,7 +1170,6 @@
         let tokenData = [];
         let currentUser = null;
         let currentRole = null;
-        let backupIntervalId = null;
 
         // Initialize the application
         function initApp() {
@@ -1237,203 +1180,178 @@
             loadAgentsList();
             loadExecutivesList();
             loadUsersList();
-            setupAutoBackup();
             updateSystemInfo();
         }
 
-        // Load user data from local storage
+        /**
+         * FIX: Correctly loads user data.
+         * Only sets default users if no user data exists in localStorage.
+         * This prevents new users from being erased on page reload.
+         */
         function loadUserData() {
-            const users = JSON.parse(localStorage.getItem('users')) || [
-                { username: 'admin', password: 'admin123', role: 'admin' },
-                { username: 'user', password: 'user123', role: 'user' },
-                { username: 'agent', password: 'agent123', role: 'agent' },
-                { username: 'executive', password: 'executive123', role: 'executive' }
-            ];
-            localStorage.setItem('users', JSON.stringify(users));
-        }
-
-        // Load token data from local storage
-        function loadTokenData() {
-            const data = localStorage.getItem('tokenData');
-            if (data) {
-                tokenData = JSON.parse(data);
-                renderDataTable();
-            } else {
-                // Initialize with sample data if none exists
-                tokenData = [
-                    {
-                        id: 1,
-                        date: '2023-05-15',
-                        completionDate: '2023-05-20',
-                        location: 'India',
-                        subLocation: 'Mumbai',
-                        token: 'TK001',
-                        password: 'pass123',
-                        clientName: 'John Doe',
-                        contact: '9876543210',
-                        whoWillShip: 'Client',
-                        contactedClient: 'Contacted client',
-                        status: 'Completed',
-                        forwarded: 'Done',
-                        charges: 1500,
-                        paymentReceived: 1500,
-                        amountDue: 0,
-                        chargesToExecutive: 1000,
-                        margin: 500,
-                        agentName: 'Rajesh',
-                        executiveName: 'Ramnath',
-                        processBy: 'Doorstep'
-                    },
-                    {
-                        id: 2,
-                        date: '2023-05-16',
-                        completionDate: '',
-                        location: 'International',
-                        subLocation: 'USA',
-                        token: 'TK002',
-                        password: 'pass456',
-                        clientName: 'Jane Smith',
-                        contact: '1234567890',
-                        whoWillShip: 'Executive',
-                        contactedClient: 'Biometric Completed',
-                        status: 'Not Completed',
-                        forwarded: 'Not Done',
-                        charges: 2000,
-                        paymentReceived: 1000,
-                        amountDue: 1000,
-                        chargesToExecutive: 1500,
-                        margin: 500,
-                        agentName: 'Suresh',
-                        executiveName: 'Ramnath',
-                        processBy: 'Device'
-                    }
+            if (!localStorage.getItem('users')) {
+                const defaultUsers = [
+                    { username: 'admin', password: 'admin123', role: 'admin' },
+                    { username: 'user', password: 'user123', role: 'user' },
+                    { username: 'agent', password: 'agent123', role: 'agent' },
+                    { username: 'executive', password: 'executive123', role: 'executive' }
                 ];
-                saveTokenData();
-                renderDataTable();
+                localStorage.setItem('users', JSON.stringify(defaultUsers));
             }
         }
 
-        // Save token data to local storage
-        function saveTokenData() {
-            localStorage.setItem('tokenData', JSON.stringify(tokenData));
-        }
+
+        // This fetches data from your server's API
+		async function loadTokenData() {
+			try {
+				const response = await fetch('/api/tokens'); // Send request to the backend
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				tokenData = await response.json(); // Get data from the response
+				renderDataTable(); // Update the table on the screen
+			} catch (error) {
+				console.error('Error loading token data:', error);
+				showAlert('Could not load data from the server.', 'danger');
+			}
+		}
+        // This sends data to the server to be created or updated in the database
+		async function saveToken() {
+			const tokenId = document.getElementById('tokenId').value;
+			
+			// This part stays the same: gather all the data from the form
+			const formData = {
+				date: document.getElementById('date').value,
+				completionDate: document.getElementById('completionDate').value || null,
+				location: document.getElementById('location').value,
+				subLocation: document.getElementById('location').value === 'India' 
+					? document.getElementById('subLocation').value 
+					: document.getElementById('countrySelect').value,
+				token: document.getElementById('token').value,
+				password: document.getElementById('password').value,
+				clientName: document.getElementById('clientName').value,
+				contact: document.getElementById('contact').value,
+				whoWillShip: document.getElementById('whoWillShip').value,
+				contactedClient: document.getElementById('contactedClient').value,
+				status: document.getElementById('status').value,
+				forwarded: document.getElementById('forwarded').value,
+				charges: parseFloat(document.getElementById('charges').value) || 0,
+				paymentReceived: parseFloat(document.getElementById('paymentReceived').value) || 0,
+				amountDue: parseFloat(document.getElementById('amountDue').value) || 0,
+				chargesToExecutive: parseFloat(document.getElementById('chargesToExecutive').value) || 0,
+				margin: parseFloat(document.getElementById('margin').value) || 0,
+				agentName: document.getElementById('agentName').value,
+				executiveName: document.getElementById('executiveName').value,
+				processBy: document.getElementById('processBy').value
+			};
+
+			try {
+				const url = tokenId ? `/api/tokens/${tokenId}` : '/api/tokens';
+				const method = tokenId ? 'PUT' : 'POST';
+
+				const response = await fetch(url, {
+					method: method,
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(formData)
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to save token');
+				}
+
+				showAlert(tokenId ? 'Token updated successfully' : 'Token added successfully', 'success');
+				resetForm();
+				loadTokenData(); // Reload all data from server to show the change
+			} catch (error) {
+				console.error('Error saving token:', error);
+				showAlert('Error saving token. Please try again.', 'danger');
+			}
+		}
+        
 
         // Setup event listeners
         function setupEventListeners() {
-            // Login form submission
             document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 handleLogin();
             });
-
-            // Token form submission
             document.getElementById('tokenForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveToken();
             });
-
-            // Search functionality
             document.getElementById('searchInput').addEventListener('input', function() {
                 filterData();
             });
         }
 
         // Handle user login
-        function handleLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                currentUser = user.username;
-                currentRole = user.role;
-                
-                // Hide login, show main app
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                
-                // Update UI with current user info
-                document.getElementById('currentUser').textContent = currentUser;
-                document.getElementById('userRole').textContent = currentRole;
-                
-                // Update UI based on role
-                updateUIForRole();
-                
-                // Show success message
-                showAlert('Login successful! Welcome ' + currentUser, 'success');
-            } else {
-                showAlert('Invalid username or password', 'danger', 'loginAlert');
-            }
-        }
+        async function handleLogin() {
+			const username = document.getElementById('loginUsername').value;
+			const password = document.getElementById('loginPassword').value;
+
+			try {
+				const response = await fetch('/api/login', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ username, password })
+				});
+
+				const data = await response.json();
+
+				if (!response.ok) {
+					// If the server responded with an error (like 401 Unauthorized)
+					throw new Error(data.error || 'Login failed');
+				}
+
+				// --- Login was successful ---
+				currentUser = data.username;
+				currentRole = data.role;
+				
+				document.getElementById('loginScreen').style.display = 'none';
+				document.getElementById('mainApp').style.display = 'block';
+				
+				document.getElementById('currentUser').textContent = currentUser;
+				document.getElementById('userRole').textContent = currentRole;
+				
+				updateUIForRole();
+				
+				showAlert('Login successful! Welcome ' + currentUser, 'success');
+
+			} catch (error) {
+				console.error('Login error:', error);
+				showAlert(error.message, 'danger', 'loginAlert');
+			}
+		}
 
         // Logout function
         function logout() {
             currentUser = null;
             currentRole = null;
             
-            // Show login, hide main app
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
-            
-            // Clear login form
             document.getElementById('loginForm').reset();
-            
             showAlert('You have been logged out', 'info', 'loginAlert');
         }
 
         // Update UI based on user role
         function updateUIForRole() {
-            // Hide all role-specific elements first
-            document.querySelectorAll('.admin-only, .user-only, .agent-only, .executive-only').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            document.querySelectorAll('.admin-only-column, .user-only-column, .agent-only-column, .executive-only-column').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            document.querySelectorAll('.admin-only-field, .user-only-field').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            // Show elements based on current role
+            document.querySelectorAll('.admin-only, .user-only, .agent-only, .executive-only').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.admin-only-column, .user-only-column, .agent-only-column, .executive-only-column').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.admin-only-field, .user-only-field').forEach(el => el.style.display = 'none');
+
+            const show = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = '');
+
             if (currentRole === 'admin') {
-                document.querySelectorAll('.admin-only').forEach(el => {
-                    el.style.display = 'block';
-                });
-                document.querySelectorAll('.admin-only-column').forEach(el => {
-                    el.style.display = 'table-cell';
-                });
-                document.querySelectorAll('.admin-only-field').forEach(el => {
-                    el.style.display = 'flex';
-                });
+                show('.admin-only, .admin-only-column, .admin-only-field');
             } else if (currentRole === 'user') {
-                document.querySelectorAll('.user-only').forEach(el => {
-                    el.style.display = 'block';
-                });
-                document.querySelectorAll('.user-only-column').forEach(el => {
-                    el.style.display = 'table-cell';
-                });
-                document.querySelectorAll('.user-only-field').forEach(el => {
-                    el.style.display = 'flex';
-                });
+                show('.user-only, .user-only-column, .user-only-field');
             } else if (currentRole === 'agent') {
-                document.querySelectorAll('.agent-only').forEach(el => {
-                    el.style.display = 'block';
-                });
-                document.querySelectorAll('.agent-only-column').forEach(el => {
-                    el.style.display = 'table-cell';
-                });
+                show('.agent-only, .agent-only-column');
             } else if (currentRole === 'executive') {
-                document.querySelectorAll('.executive-only').forEach(el => {
-                    el.style.display = 'block';
-                });
-                document.querySelectorAll('.executive-only-column').forEach(el => {
-                    el.style.display = 'table-cell';
-                });
+                show('.executive-only, .executive-only-column');
             }
+            renderDataTable();
         }
 
         // Render data table
@@ -1446,99 +1364,90 @@
             const statusFilter = document.getElementById('statusFilter').value;
             
             const filteredData = tokenData.filter(item => {
-                const matchesSearch = 
-                    item.token.toLowerCase().includes(searchTerm) ||
-                    item.clientName.toLowerCase().includes(searchTerm) ||
-                    item.agentName.toLowerCase().includes(searchTerm);
-                
+                const searchFields = [item.token, item.clientName, item.agentName].join(' ').toLowerCase();
+                const matchesSearch = searchFields.includes(searchTerm);
                 const matchesLocation = locationFilter ? item.location === locationFilter : true;
                 const matchesStatus = statusFilter ? item.status === statusFilter : true;
-                
                 return matchesSearch && matchesLocation && matchesStatus;
             });
             
-            filteredData.forEach(item => {
-                const row = document.createElement('tr');
-                
-                const chargesDisplay = (currentRole === 'admin' || currentRole === 'user') && item.charges ? 
-                    '₹' + item.charges : '-';
-                const amountDueDisplay = (currentRole === 'admin' || currentRole === 'user' || currentRole === 'agent') && item.amountDue ? 
-                    '₹' + item.amountDue : '-';
-                
-                row.innerHTML = `
-                    <td class="text-nowrap">${item.id}</td>
-                    <td class="text-nowrap">${item.date}</td>
-                    <td class="text-nowrap">${item.location}</td>
-                    <td class="text-nowrap">${item.token}</td>
-                    <td>${item.clientName}</td>
-                    <td class="text-nowrap"><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
-                    ${currentRole === 'admin' || currentRole === 'user' ? `<td class="text-nowrap">${chargesDisplay}</td>` : ''}
-                    ${currentRole === 'admin' || currentRole === 'user' || currentRole === 'agent' ? `<td class="text-nowrap">${amountDueDisplay}</td>` : ''}
-                    <td class="text-nowrap">${item.agentName || '-'}</td>
-                    <td class="text-nowrap">${item.executiveName || '-'}</td>
-                    <td class="text-nowrap">
-                        <button class="btn btn-sm btn-primary" onclick="editToken(${item.id})" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteToken(${item.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
+            tableBody.innerHTML = filteredData.map(item => {
+                 const chargesDisplay = item.charges ? `₹${item.charges}` : '-';
+                 const amountDueDisplay = item.amountDue ? `₹${item.amountDue}` : '-';
+                 
+                 return `
+                    <tr>
+                        <td class="text-nowrap">${item.id}</td>
+                        <td class="text-nowrap">${item.date}</td>
+                        <td class="text-nowrap">${item.location}</td>
+                        <td class="text-nowrap">${item.token}</td>
+                        <td>${item.clientName}</td>
+                        <td class="text-nowrap"><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
+                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
+                        <td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
+                        <td class="text-nowrap">${item.agentName || '-'}</td>
+                        <td class="text-nowrap">${item.executiveName || '-'}</td>
+                        <td class="text-nowrap">
+                            <button class="btn btn-sm btn-primary" onclick="editToken(${item.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteToken(${item.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                 `;
+            }).join('');
         }
 
-        // Save token (add or update)
-        function saveToken() {
-            const tokenId = document.getElementById('tokenId').value;
-            const formData = {
-                date: document.getElementById('date').value,
-                completionDate: document.getElementById('completionDate').value,
-                location: document.getElementById('location').value,
-                subLocation: document.getElementById('location').value === 'India' ? 
-                    document.getElementById('subLocation').value : 
-                    document.getElementById('countrySelect').value,
-                token: document.getElementById('token').value,
-                password: document.getElementById('password').value,
-                clientName: document.getElementById('clientName').value,
-                contact: document.getElementById('contact').value,
-                whoWillShip: document.getElementById('whoWillShip').value,
-                contactedClient: document.getElementById('contactedClient').value,
-                status: document.getElementById('status').value,
-                forwarded: document.getElementById('forwarded').value,
-                charges: parseFloat(document.getElementById('charges').value) || 0,
-                paymentReceived: parseFloat(document.getElementById('paymentReceived').value) || 0,
-                amountDue: parseFloat(document.getElementById('amountDue').value) || 0,
-                chargesToExecutive: parseFloat(document.getElementById('chargesToExecutive').value) || 0,
-                margin: parseFloat(document.getElementById('margin').value) || 0,
-                agentName: document.getElementById('agentName').value,
-                executiveName: document.getElementById('executiveName').value,
-                processBy: document.getElementById('processBy').value
-            };
-            
-            if (tokenId) {
-                // Update existing token
-                const index = tokenData.findIndex(item => item.id == tokenId);
-                if (index !== -1) {
-                    tokenData[index] = { id: parseInt(tokenId), ...formData };
-                    showAlert('Token updated successfully', 'success');
-                }
-            } else {
-                // Add new token
-                const newId = tokenData.length > 0 ? Math.max(...tokenData.map(item => item.id)) + 1 : 1;
-                tokenData.push({ id: newId, ...formData });
-                showAlert('Token added successfully', 'success');
-            }
-            
-            saveTokenData();
-            renderDataTable();
-            resetForm();
-            loadAgentsList();
-            loadExecutivesList();
-        }
+        // This sends data to the server to be created or updated in the database
+		async function saveToken() {
+			const tokenId = document.getElementById('tokenId').value;
+			
+			// This part stays the same: gather all the data from the form
+			const formData = {
+				date: document.getElementById('date').value,
+				completionDate: document.getElementById('completionDate').value || null,
+				location: document.getElementById('location').value,
+				subLocation: document.getElementById('location').value === 'India' 
+					? document.getElementById('subLocation').value 
+					: document.getElementById('countrySelect').value,
+				token: document.getElementById('token').value,
+				password: document.getElementById('password').value,
+				clientName: document.getElementById('clientName').value,
+				contact: document.getElementById('contact').value,
+				whoWillShip: document.getElementById('whoWillShip').value,
+				contactedClient: document.getElementById('contactedClient').value,
+				status: document.getElementById('status').value,
+				forwarded: document.getElementById('forwarded').value,
+				charges: parseFloat(document.getElementById('charges').value) || 0,
+				paymentReceived: parseFloat(document.getElementById('paymentReceived').value) || 0,
+				amountDue: parseFloat(document.getElementById('amountDue').value) || 0,
+				chargesToExecutive: parseFloat(document.getElementById('chargesToExecutive').value) || 0,
+				margin: parseFloat(document.getElementById('margin').value) || 0,
+				agentName: document.getElementById('agentName').value,
+				executiveName: document.getElementById('executiveName').value,
+				processBy: document.getElementById('processBy').value
+			};
 
+			try {
+				const url = tokenId ? `/api/tokens/${tokenId}` : '/api/tokens';
+				const method = tokenId ? 'PUT' : 'POST';
+
+				const response = await fetch(url, {
+					method: method,
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(formData)
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to save token');
+				}
+
+				showAlert(tokenId ? 'Token updated successfully' : 'Token added successfully', 'success');
+				resetForm();
+				loadTokenData(); // Reload all data from server to show the change
+			} catch (error) {
+				console.error('Error saving token:', error);
+				showAlert('Error saving token. Please try again.', 'danger');
+			}
+		}
         // Edit token
         function editToken(id) {
             const token = tokenData.find(item => item.id === id);
@@ -1547,15 +1456,9 @@
                 document.getElementById('date').value = token.date;
                 document.getElementById('completionDate').value = token.completionDate || '';
                 document.getElementById('location').value = token.location;
-                
                 updateSubLocationField();
-                
-                if (token.location === 'India') {
-                    document.getElementById('subLocation').value = token.subLocation;
-                } else {
-                    document.getElementById('countrySelect').value = token.subLocation;
-                }
-                
+                if (token.location === 'India') document.getElementById('subLocation').value = token.subLocation;
+                else document.getElementById('countrySelect').value = token.subLocation;
                 document.getElementById('token').value = token.token;
                 document.getElementById('password').value = token.password || '';
                 document.getElementById('clientName').value = token.clientName;
@@ -1574,33 +1477,38 @@
                 document.getElementById('processBy').value = token.processBy || 'Doorstep';
                 
                 document.getElementById('submitBtnText').textContent = 'Update Token';
-                
-                // Scroll to form
                 document.getElementById('tokenForm').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
-        // Delete token
-        function deleteToken(id) {
-            if (confirm('Are you sure you want to delete this token?')) {
-                tokenData = tokenData.filter(item => item.id !== id);
-                saveTokenData();
-                renderDataTable();
-                loadAgentsList();
-                loadExecutivesList();
-                showAlert('Token deleted successfully', 'success');
-            }
-        }
+        // This tells the server to delete the item from the database
+		async function deleteToken(id) {
+			if (confirm('Are you sure you want to delete this token?')) {
+				try {
+					const response = await fetch(`/api/tokens/${id}`, {
+						method: 'DELETE'
+					});
+
+					if (!response.ok) {
+						throw new Error('Failed to delete token');
+					}
+
+					showAlert('Token deleted successfully', 'success');
+					loadTokenData(); // Reload all data from server to show the change
+				} catch (error) {
+					console.error('Error deleting token:', error);
+					showAlert('Error deleting token. Please try again.', 'danger');
+				}
+			}
+		}
 
         // Reset form
         function resetForm() {
             document.getElementById('tokenForm').reset();
             document.getElementById('tokenId').value = '';
             document.getElementById('submitBtnText').textContent = 'Add Token';
-            document.getElementById('amountDue').value = '';
-            document.getElementById('margin').value = '';
             document.getElementById('executiveName').value = 'Ramnath';
-            
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
             updateSubLocationField();
         }
 
@@ -1610,44 +1518,25 @@
             const paymentReceived = parseFloat(document.getElementById('paymentReceived').value) || 0;
             const chargesToExecutive = parseFloat(document.getElementById('chargesToExecutive').value) || 0;
             
-            const amountDue = charges - paymentReceived;
-            const margin = paymentReceived - chargesToExecutive;
-            
-            document.getElementById('amountDue').value = amountDue.toFixed(2);
-            document.getElementById('margin').value = margin.toFixed(2);
+            document.getElementById('amountDue').value = (charges - paymentReceived).toFixed(2);
+            document.getElementById('margin').value = (charges - chargesToExecutive).toFixed(2);
         }
 
-        // Update sub-location field based on location
+        // Update sub-location field
         function updateSubLocationField() {
-            const location = document.getElementById('location').value;
-            const subLocationInput = document.getElementById('subLocation');
-            const countrySelect = document.getElementById('countrySelect');
-            const subLocationLabel = document.getElementById('subLocationLabel');
-            
-            if (location === 'India') {
-                subLocationLabel.textContent = 'City';
-                subLocationInput.style.display = 'block';
-                countrySelect.style.display = 'none';
-            } else {
-                subLocationLabel.textContent = 'Country';
-                subLocationInput.style.display = 'none';
-                countrySelect.style.display = 'block';
-            }
+            const isIndia = document.getElementById('location').value === 'India';
+            document.getElementById('subLocationLabel').textContent = isIndia ? 'City' : 'Country';
+            document.getElementById('subLocation').style.display = isIndia ? 'block' : 'none';
+            document.getElementById('countrySelect').style.display = isIndia ? 'none' : 'block';
         }
 
         // Update filter location field
         function updateFilterLocationField() {
-            const location = document.getElementById('filterLocation').value;
-            const countryFilterDiv = document.getElementById('countryFilterDiv');
-            
-            if (location === 'International') {
-                countryFilterDiv.style.display = 'block';
-            } else {
-                countryFilterDiv.style.display = 'none';
-            }
+            const isInternational = document.getElementById('filterLocation').value === 'International';
+            document.getElementById('countryFilterDiv').style.display = isInternational ? 'block' : 'none';
         }
 
-        // Filter data
+        // Filter data in main table
         function filterData() {
             renderDataTable();
         }
@@ -1661,16 +1550,14 @@
             const toDate = document.getElementById('filterToDate').value;
             const agent = document.getElementById('filterAgent').value;
             
-            const filteredData = tokenData.filter(item => {
-                const matchesStatus = status ? item.status === status : true;
-                const matchesLocation = location ? item.location === location : true;
-                const matchesCountry = country ? item.subLocation === country : true;
-                const matchesFromDate = fromDate ? item.date >= fromDate : true;
-                const matchesToDate = toDate ? item.date <= toDate : true;
-                const matchesAgent = agent ? item.agentName === agent : true;
-                
-                return matchesStatus && matchesLocation && matchesCountry && matchesFromDate && matchesToDate && matchesAgent;
-            });
+            const filteredData = tokenData.filter(item => 
+                (status ? item.status === status : true) &&
+                (location ? item.location === location : true) &&
+                (country ? item.subLocation === country : true) &&
+                (fromDate ? item.date >= fromDate : true) &&
+                (toDate ? item.date <= toDate : true) &&
+                (agent ? item.agentName === agent : true)
+            );
             
             renderFilteredTable(filteredData);
         }
@@ -1684,363 +1571,266 @@
             document.getElementById('filterToDate').value = '';
             document.getElementById('filterAgent').value = '';
             updateFilterLocationField();
-            
-            renderFilteredTable(tokenData);
+            renderFilteredTable([]);
         }
 
         // Render filtered table
         function renderFilteredTable(data) {
             const tableBody = document.getElementById('filteredTableBody');
-            tableBody.innerHTML = '';
-            
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                
-                const chargesDisplay = (currentRole === 'admin' || currentRole === 'user') && item.charges ? 
-                    '₹' + item.charges : '-';
-                const amountDueDisplay = (currentRole === 'admin' || currentRole === 'user' || currentRole === 'agent') && item.amountDue ? 
-                    '₹' + item.amountDue : '-';
-                
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.date}</td>
-                    <td>${item.location}</td>
-                    <td>${item.subLocation}</td>
-                    <td>${item.token}</td>
-                    <td>${item.clientName}</td>
-                    <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
-                    ${currentRole === 'admin' || currentRole === 'user' ? `<td>${chargesDisplay}</td>` : ''}
-                    ${currentRole === 'admin' || currentRole === 'user' || currentRole === 'agent' ? `<td>${amountDueDisplay}</td>` : ''}
-                    <td>${item.agentName || '-'}</td>
-                    <td>${item.executiveName || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="editToken(${item.id})" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteToken(${item.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-        }
-
-        // Load agents list
-        function loadAgentsList() {
-            const agents = [...new Set(tokenData.map(item => item.agentName).filter(name => name))];
-            const agentSelects = ['filterAgent', 'reportAgent', 'profitAgent'];
-            
-            agentSelects.forEach(selectId => {
-                const selectElement = document.getElementById(selectId);
-                if (selectElement) {
-                    const currentValue = selectElement.value;
-                    selectElement.innerHTML = selectId === 'profitAgent' ? '<option value="All">All Agents</option>' : '<option value="">All Agents</option>';
-                    
-                    if (selectId === 'reportAgent') {
-                        selectElement.innerHTML = '<option value="">Select Agent</option>';
-                    }
-                    
-                    agents.forEach(agent => {
-                        selectElement.innerHTML += `<option value="${agent}">${agent}</option>`;
-                    });
-                    
-                    if (currentValue) {
-                        selectElement.value = currentValue;
-                    }
-                }
-            });
-        }
-
-        // Load executives list
-        function loadExecutivesList() {
-            const executives = [...new Set(tokenData.map(item => item.executiveName).filter(name => name))];
-            const executiveSelect = document.getElementById('reportExecutive');
-            
-            if (executiveSelect) {
-                const currentValue = executiveSelect.value;
-                executiveSelect.innerHTML = '<option value="">Select Executive</option>';
-                
-                executives.forEach(executive => {
-                    executiveSelect.innerHTML += `<option value="${executive}">${executive}</option>`;
-                });
-                
-                if (currentValue) {
-                    executiveSelect.value = currentValue;
-                }
-            }
-        }
-
-        // Load users list
-        function loadUsersList() {
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const usersTableBody = document.getElementById('usersTableBody');
-            
-            if (usersTableBody) {
-                usersTableBody.innerHTML = '';
-                
-                users.forEach(user => {
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${user.username}</td>
-                        <td><span class="role-badge role-${user.role}">${user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span></td>
+            tableBody.innerHTML = data.map(item => {
+                 const chargesDisplay = item.charges ? `₹${item.charges}` : '-';
+                 const amountDueDisplay = item.amountDue ? `₹${item.amountDue}` : '-';
+                 
+                 return `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.date}</td>
+                        <td>${item.location}</td>
+                        <td>${item.subLocation}</td>
+                        <td>${item.token}</td>
+                        <td>${item.clientName}</td>
+                        <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
+                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
+                        <td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
+                        <td>${item.agentName || '-'}</td>
+                        <td>${item.executiveName || '-'}</td>
                         <td>
-                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.username}')" title="Delete User">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <button class="btn btn-sm btn-primary" onclick="editToken(${item.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteToken(${item.id})" title="Delete"><i class="fas fa-trash"></i></button>
                         </td>
-                    `;
-                    
-                    usersTableBody.appendChild(row);
-                });
-            }
+                    </tr>
+                 `;
+            }).join('');
         }
 
-        // Add new user
-        function addNewUser() {
-            const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value;
-            const role = document.getElementById('newUserRole').value;
-            
-            if (!username || !password) {
-                showAlert('Please enter both username and password', 'danger');
-                return;
-            }
-            
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            
-            if (users.some(user => user.username === username)) {
-                showAlert('Username already exists', 'danger');
-                return;
-            }
-            
-            users.push({ username, password, role });
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            loadUsersList();
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('newUserRole').value = 'user';
-            
-            showAlert('User added successfully', 'success');
+        // Load unique agents/executives into dropdowns
+        function loadUniqueNames(key, selectIds, allOptionText, defaultOptionText) {
+            const names = [...new Set(tokenData.map(item => item[key]).filter(Boolean))];
+            selectIds.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = `<option value="">${defaultOptionText}</option>`;
+                    if (allOptionText) {
+                       select.innerHTML = `<option value="All">${allOptionText}</option>`;
+                    }
+                    names.forEach(name => select.innerHTML += `<option value="${name}">${name}</option>`);
+                    select.value = currentValue;
+                }
+            });
         }
+        function loadAgentsList() { loadUniqueNames('agentName', ['filterAgent', 'reportAgent', 'profitAgent'], 'All Agents', 'Select Agent'); }
+        function loadExecutivesList() { loadUniqueNames('executiveName', ['reportExecutive'], null, 'Select Executive'); }
+
+        // Load users list for settings
+        async function loadUsersList() {
+			try {
+				const response = await fetch('/api/users');
+				const users = await response.json();
+				const usersTableBody = document.getElementById('usersTableBody');
+				
+				if (usersTableBody) {
+					usersTableBody.innerHTML = users.map(user => `
+						<tr>
+							<td>${user.username}</td>
+							<td><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></td>
+							<td>
+								${user.username !== 'admin' ? 
+								  `<button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})" title="Delete User">
+									  <i class="fas fa-trash"></i>
+								   </button>` : ''}
+							</td>
+						</tr>
+					`).join('');
+				}
+			} catch (error) {
+				console.error('Error loading users:', error);
+				showAlert('Could not load user list.', 'danger');
+			}
+		}
+        // Add new user
+        async function addNewUser() {
+			const username = document.getElementById('newUsername').value.trim();
+			const password = document.getElementById('newPassword').value;
+			const role = document.getElementById('newUserRole').value;
+			
+			if (!username || !password) {
+				return showAlert('Username and password are required', 'warning');
+			}
+
+			try {
+				const response = await fetch('/api/users', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ username, password, role })
+				});
+
+				if (!response.ok) {
+					const errData = await response.json();
+					throw new Error(errData.error || 'Failed to add user');
+				}
+
+				showAlert('User added successfully', 'success');
+				document.getElementById('newUsername').value = '';
+				document.getElementById('newPassword').value = '';
+				loadUsersList(); // Refresh the list from the server
+			} catch (error) {
+				console.error('Error adding user:', error);
+				showAlert(error.message, 'danger');
+			}
+		}
 
         // Delete user
-        function deleteUser(username) {
-            if (username === currentUser) {
-                showAlert('You cannot delete your own account', 'danger');
-                return;
-            }
-            
-            if (confirm(`Are you sure you want to delete user ${username}?`)) {
-                let users = JSON.parse(localStorage.getItem('users')) || [];
-                users = users.filter(user => user.username !== username);
-                localStorage.setItem('users', JSON.stringify(users));
-                
-                loadUsersList();
-                showAlert('User deleted successfully', 'success');
-            }
-        }
+        async function deleteUser(id) {
+			if (confirm(`Are you sure you want to delete this user?`)) {
+				try {
+					const response = await fetch(`/api/users/${id}`, {
+						method: 'DELETE'
+					});
 
-        // Generate agent report
+					if (!response.ok) {
+						throw new Error('Failed to delete user');
+					}
+
+					showAlert('User deleted successfully', 'success');
+					loadUsersList(); // Refresh the list from the server
+				} catch (error) {
+					console.error('Error deleting user:', error);
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+
+        // Generate and render agent report
         function generateAgentReport() {
             const agent = document.getElementById('reportAgent').value;
             const status = document.getElementById('reportAgentStatus').value;
             const fromDate = document.getElementById('reportAgentFromDate').value;
             const toDate = document.getElementById('reportAgentToDate').value;
             
-            if (!agent) {
-                showAlert('Please select an agent', 'danger');
-                return;
-            }
+            if (!agent) return showAlert('Please select an agent', 'danger');
             
-            let filteredData = tokenData.filter(item => item.agentName === agent);
-            
-            if (status !== 'All') {
-                filteredData = filteredData.filter(item => 
-                    status === 'Completed' ? item.status === 'Completed' : item.status !== 'Completed'
-                );
-            }
-            
-            if (fromDate) {
-                filteredData = filteredData.filter(item => item.date >= fromDate);
-            }
-            
-            if (toDate) {
-                filteredData = filteredData.filter(item => item.date <= toDate);
-            }
-            
+            const filteredData = tokenData.filter(item => 
+                item.agentName === agent &&
+                (status === 'All' ? true : (status === 'Completed' ? item.status === 'Completed' : item.status !== 'Completed')) &&
+                (fromDate ? item.date >= fromDate : true) &&
+                (toDate ? item.date <= toDate : true)
+            );
             renderAgentReport(filteredData);
         }
 
-        // Render agent report
+        // Render agent report table
         function renderAgentReport(data) {
             const tableBody = document.getElementById('agentReportBody');
-            tableBody.innerHTML = '';
-            
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                
-                const chargesDisplay = (currentRole === 'admin' || currentRole === 'user') && item.charges ? 
-                    '₹' + item.charges : '-';
-                const amountDueDisplay = (currentRole === 'admin' || currentRole === 'user' || currentRole === 'agent') && item.amountDue ? 
-                    '₹' + item.amountDue : '-';
-                const paymentDisplay = (currentRole === 'admin' || currentRole === 'user') && item.paymentReceived ? 
-                    '₹' + item.paymentReceived : 'No';
-                
-                row.innerHTML = `
-                    <td><input type="checkbox" class="agent-checkbox" data-id="${item.id}"></td>
-                    <td>${item.date}</td>
-                    <td>${item.completionDate || '-'}</td>
-                    <td>${item.location}</td>
-                    <td>${item.token}</td>
-                    <td>${item.clientName}</td>
-                    ${currentRole === 'admin' || currentRole === 'user' ? `<td>${chargesDisplay}</td>` : ''}
-                    ${currentRole === 'admin' || currentRole === 'user' || currentRole === 'agent' ? `<td>${amountDueDisplay}</td>` : ''}
-                    <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
-                    ${currentRole === 'admin' || currentRole === 'user' ? `<td>${paymentDisplay}</td>` : ''}
+            tableBody.innerHTML = data.map(item => {
+                const chargesDisplay = item.charges ? `₹${item.charges}` : '-';
+                const amountDueDisplay = item.amountDue ? `₹${item.amountDue}` : '-';
+                const paymentDisplay = item.paymentReceived ? `₹${item.paymentReceived}` : 'No';
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="agent-checkbox" data-id="${item.id}"></td>
+                        <td>${item.date}</td>
+                        <td>${item.completionDate || '-'}</td>
+                        <td>${item.location}</td>
+                        <td>${item.token}</td>
+                        <td>${item.clientName}</td>
+                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
+                        <td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
+                        <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
+                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${paymentDisplay}</td>
+                    </tr>
                 `;
-                
-                tableBody.appendChild(row);
-            });
+            }).join('');
         }
 
         // Toggle select all checkboxes
         function toggleSelectAll(type) {
-            const checkboxes = document.querySelectorAll(`.${type}-checkbox`);
-            const selectAll = document.getElementById(`selectAll${type.charAt(0).toUpperCase() + type.slice(1)}`);
-            
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAll.checked;
-            });
+            const isChecked = document.getElementById(`selectAll${type.charAt(0).toUpperCase() + type.slice(1)}`).checked;
+            document.querySelectorAll(`.${type}-checkbox`).forEach(checkbox => checkbox.checked = isChecked);
         }
 
-        // Generate executive report
+        // Generate and render executive report
         function generateExecutiveReport() {
             const executive = document.getElementById('reportExecutive').value;
             const status = document.getElementById('reportExecutiveStatus').value;
             const fromDate = document.getElementById('reportExecutiveFromDate').value;
             const toDate = document.getElementById('reportExecutiveToDate').value;
             
-            if (!executive) {
-                showAlert('Please select an executive', 'danger');
-                return;
-            }
+            if (!executive) return showAlert('Please select an executive', 'danger');
             
-            let filteredData = tokenData.filter(item => item.executiveName === executive);
-            
-            if (status !== 'All') {
-                filteredData = filteredData.filter(item => 
-                    status === 'Completed' ? item.status === 'Completed' : item.status !== 'Completed'
-                );
-            }
-            
-            if (fromDate) {
-                filteredData = filteredData.filter(item => item.date >= fromDate);
-            }
-            
-            if (toDate) {
-                filteredData = filteredData.filter(item => item.date <= toDate);
-            }
-            
+            const filteredData = tokenData.filter(item => 
+                item.executiveName === executive &&
+                (status === 'All' ? true : (status === 'Completed' ? item.status === 'Completed' : item.status !== 'Completed')) &&
+                (fromDate ? item.date >= fromDate : true) &&
+                (toDate ? item.date <= toDate : true)
+            );
             renderExecutiveReport(filteredData);
         }
 
-        // Render executive report
+        // Render executive report table
         function renderExecutiveReport(data) {
             const tableBody = document.getElementById('executiveReportBody');
-            tableBody.innerHTML = '';
-            
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                
-                const executiveChargesDisplay = (currentRole === 'admin' || currentRole === 'executive') && item.chargesToExecutive ? 
-                    '₹' + item.chargesToExecutive : '-';
-                const marginDisplay = currentRole === 'admin' && item.margin ? 
-                    '₹' + item.margin : '-';
-                const paymentDisplay = item.paymentReceived ? '₹' + item.paymentReceived : 'No';
-                
-                row.innerHTML = `
-                    <td><input type="checkbox" class="executive-checkbox" data-id="${item.id}"></td>
-                    <td>${item.date}</td>
-                    <td>${item.completionDate || '-'}</td>
-                    <td>${item.location}</td>
-                    <td>${item.token}</td>
-                    <td>${item.clientName}</td>
-                    ${currentRole === 'admin' || currentRole === 'executive' ? `<td>${executiveChargesDisplay}</td>` : ''}
-                    ${currentRole === 'admin' ? `<td>${marginDisplay}</td>` : ''}
-                    <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
-                    <td>${paymentDisplay}</td>
+            tableBody.innerHTML = data.map(item => {
+                const executiveChargesDisplay = item.chargesToExecutive ? `₹${item.chargesToExecutive}` : '-';
+                const marginDisplay = item.margin ? `₹${item.margin}` : '-';
+                const paymentDisplay = item.paymentReceived ? 'Yes' : 'No';
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="executive-checkbox" data-id="${item.id}"></td>
+                        <td>${item.date}</td>
+                        <td>${item.completionDate || '-'}</td>
+                        <td>${item.location}</td>
+                        <td>${item.token}</td>
+                        <td>${item.clientName}</td>
+                        <td class="admin-only-column executive-only-column" style="display: ${['admin', 'executive'].includes(currentRole) ? '' : 'none'}">${executiveChargesDisplay}</td>
+                        <td class="admin-only-column" style="display: ${currentRole === 'admin' ? '' : 'none'}">${marginDisplay}</td>
+                        <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
+                        <td>${paymentDisplay}</td>
+                    </tr>
                 `;
-                
-                tableBody.appendChild(row);
-            });
+            }).join('');
         }
 
-        // Generate profit report
+        // Generate and render profit report
         function generateProfitReport() {
             const agent = document.getElementById('profitAgent').value;
             const location = document.getElementById('profitLocation').value;
             const fromDate = document.getElementById('profitFromDate').value;
             const toDate = document.getElementById('profitToDate').value;
             
-            let filteredData = tokenData;
-            
-            if (agent !== 'All') {
-                filteredData = filteredData.filter(item => item.agentName === agent);
-            }
-            
-            if (location !== 'All') {
-                filteredData = filteredData.filter(item => item.location === location);
-            }
-            
-            if (fromDate) {
-                filteredData = filteredData.filter(item => item.date >= fromDate);
-            }
-            
-            if (toDate) {
-                filteredData = filteredData.filter(item => item.date <= toDate);
-            }
-            
+            let filteredData = tokenData.filter(item => 
+                (agent === 'All' ? true : item.agentName === agent) &&
+                (location === 'All' ? true : item.location === location) &&
+                (fromDate ? item.date >= fromDate : true) &&
+                (toDate ? item.date <= toDate : true)
+            );
             renderProfitReport(filteredData);
         }
 
         // Render profit report
         function renderProfitReport(data) {
             const tableBody = document.getElementById('profitTableBody');
-            tableBody.innerHTML = '';
-            
-            let totalRevenue = 0;
-            let totalExpenses = 0;
-            let completedCount = 0;
-            let totalMargin = 0;
-            
-            data.forEach(item => {
+            let totalRevenue = 0, totalExpenses = 0, completedCount = 0, totalMargin = 0;
+
+            tableBody.innerHTML = data.map(item => {
                 totalRevenue += item.paymentReceived || 0;
                 totalExpenses += item.chargesToExecutive || 0;
                 totalMargin += item.margin || 0;
+                if (item.status === 'Completed') completedCount++;
                 
-                if (item.status === 'Completed') {
-                    completedCount++;
-                }
-                
-                const row = document.createElement('tr');
-                
-                row.innerHTML = `
-                    <td>${item.date}</td>
-                    <td>${item.agentName || '-'}</td>
-                    <td>${item.clientName}</td>
-                    <td>${item.location}</td>
-                    <td>${item.charges ? '₹' + item.charges : '-'}</td>
-                    <td>${item.chargesToExecutive ? '₹' + item.chargesToExecutive : '-'}</td>
-                    <td>${item.margin ? '₹' + item.margin : '-'}</td>
-                    <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
+                return `
+                    <tr>
+                        <td>${item.date}</td>
+                        <td>${item.agentName || '-'}</td>
+                        <td>${item.clientName}</td>
+                        <td>${item.location}</td>
+                        <td>${item.charges ? '₹' + item.charges : '-'}</td>
+                        <td>${item.chargesToExecutive ? '₹' + item.chargesToExecutive : '-'}</td>
+                        <td>${item.margin ? '₹' + item.margin : '-'}</td>
+                        <td><span class="badge ${item.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
+                    </tr>
                 `;
-                
-                tableBody.appendChild(row);
-            });
+            }).join('');
             
             const netProfit = totalRevenue - totalExpenses;
             const averageMargin = data.length > 0 ? totalMargin / data.length : 0;
@@ -2055,203 +1845,95 @@
             document.getElementById('completionRate').textContent = completionRate.toFixed(1) + '%';
         }
 
-        // Mark all as completed
+        // Mark selected items as completed
         function markAllCompleted(type) {
             const checkboxes = document.querySelectorAll(`.${type}-checkbox:checked`);
-            
-            if (checkboxes.length === 0) {
-                showAlert('Please select at least one item', 'warning');
-                return;
-            }
-            
-            if (confirm(`Are you sure you want to mark ${checkboxes.length} items as completed?`)) {
+            if (checkboxes.length === 0) return showAlert('Please select at least one item', 'warning');
+
+            if (confirm(`Mark ${checkboxes.length} items as completed? This will set their status and add a completion date.`)) {
                 checkboxes.forEach(checkbox => {
-                    const id = parseInt(checkbox.getAttribute('data-id'));
-                    const index = tokenData.findIndex(item => item.id === id);
-                    
-                    if (index !== -1) {
-                        tokenData[index].paymentReceived = (tokenData[index].paymentReceived || 0) + paymentAmount;
-                        tokenData[index].amountDue = (tokenData[index].charges || 0) - tokenData[index].paymentReceived;
-                        
-                        if (tokenData[index].amountDue <= 0) {
-                            tokenData[index].status = 'Completed';
-                            tokenData[index].completionDate = new Date().toISOString().split('T')[0];
+                    const id = parseInt(checkbox.dataset.id);
+                    const item = tokenData.find(t => t.id === id);
+                    if (item) {
+                        item.status = 'Completed';
+                        item.completionDate = new Date().toISOString().split('T')[0];
+                    }
+                });
+                saveTokenData();
+                if (type === 'agent') generateAgentReport();
+                else generateExecutiveReport();
+                showAlert(`${checkboxes.length} items marked as completed`, 'success');
+            }
+        }
+        
+        // Generic bulk payment function
+        function bulkApplyPayment(type) {
+            const checkboxes = document.querySelectorAll(`.${type}-checkbox:checked`);
+            if (checkboxes.length === 0) return showAlert('Please select at least one item', 'warning');
+
+            const amountStr = prompt('Enter payment amount to apply to each selected item:');
+            if (amountStr && !isNaN(parseFloat(amountStr))) {
+                const paymentAmount = parseFloat(amountStr);
+                checkboxes.forEach(checkbox => {
+                    const id = parseInt(checkbox.dataset.id);
+                    const item = tokenData.find(t => t.id === id);
+                    if (item) {
+                        item.paymentReceived = (item.paymentReceived || 0) + paymentAmount;
+                        item.amountDue = (item.charges || 0) - item.paymentReceived;
+                        if (item.amountDue <= 0) {
+                            item.status = 'Completed';
+                            item.completionDate = new Date().toISOString().split('T')[0];
                         }
                     }
                 });
-                
                 saveTokenData();
-                generateAgentReport();
-                
+                if (type === 'agent') generateAgentReport();
+                else generateExecutiveReport();
                 showAlert(`Payment applied to ${checkboxes.length} items`, 'success');
             }
         }
+        function bulkApplyAgentPayment() { bulkApplyPayment('agent'); }
+        function bulkApplyExecutivePayment() { bulkApplyPayment('executive'); }
+        
 
-        // Bulk apply executive payment
-        function bulkApplyExecutivePayment() {
-            const checkboxes = document.querySelectorAll('.executive-checkbox:checked');
-            
-            if (checkboxes.length === 0) {
-                showAlert('Please select at least one item', 'warning');
-                return;
-            }
-            
-            const amount = prompt('Enter payment amount to apply:');
-            
-            if (amount && !isNaN(parseFloat(amount))) {
-                const paymentAmount = parseFloat(amount);
-                
-                checkboxes.forEach(checkbox => {
-                    const id = parseInt(checkbox.getAttribute('data-id'));
-                    const index = tokenData.findIndex(item => item.id === id);
-                    
-                    if (index !== -1) {
-                        tokenData[index].paymentReceived = (tokenData[index].paymentReceived || 0) + paymentAmount;
-                        tokenData[index].amountDue = (tokenData[index].charges || 0) - tokenData[index].paymentReceived;
-                        
-                        if (tokenData[index].amountDue <= 0) {
-                            tokenData[index].status = 'Completed';
-                            tokenData[index].completionDate = new Date().toISOString().split('T')[0];
-                        }
-                    }
-                });
-                
-                saveTokenData();
-                generateExecutiveReport();
-                
-                showAlert(`Payment applied to ${checkboxes.length} items`, 'success');
-            }
+        // Utility to download CSV
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
-        // Export data as CSV - FIXED VERSION
+        // Export data as CSV
         function exportData() {
-            if (tokenData.length === 0) {
-                showAlert('No data to export', 'warning');
-                return;
-            }
-            
-            const headers = ['ID', 'Date', 'Completion Date', 'Location', 'City/Country', 'Token', 'Password', 
-                            'Client Name', 'Contact', 'Who Will Ship', 'Client Status', 'Status', 'Forwarded',
-                            'Charges', 'Payment Received', 'Amount Due', 'Executive Charges', 'Margin',
-                            'Agent Name', 'Executive Name', 'Process By'];
-            
-            const csvContent = [
+            if (tokenData.length === 0) return showAlert('No data to export', 'warning');
+            const headers = Object.keys(tokenData[0]);
+            const csv = [
                 headers.join(','),
-                ...tokenData.map(item => [
-                    item.id || '',
-                    `"${item.date || ''}"`,
-                    `"${item.completionDate || ''}"`,
-                    `"${item.location || ''}"`,
-                    `"${item.subLocation || ''}"`,
-                    `"${item.token || ''}"`,
-                    `"${item.password || ''}"`,
-                    `"${item.clientName || ''}"`,
-                    `"${item.contact || ''}"`,
-                    `"${item.whoWillShip || ''}"`,
-                    `"${item.contactedClient || ''}"`,
-                    `"${item.status || ''}"`,
-                    `"${item.forwarded || ''}"`,
-                    item.charges || 0,
-                    item.paymentReceived || 0,
-                    item.amountDue || 0,
-                    item.chargesToExecutive || 0,
-                    item.margin || 0,
-                    `"${item.agentName || ''}"`,
-                    `"${item.executiveName || ''}"`,
-                    `"${item.processBy || ''}"`
-                ].join(','))
+                ...tokenData.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
             ].join('\n');
-            
-            downloadCSV(csvContent, 'token-data.csv');
-            showAlert('Data exported as CSV successfully', 'success');
+            downloadCSV(csv, 'token-data.csv');
+            showAlert('Data exported as CSV', 'success');
         }
-
-        // Export filtered data as CSV - FIXED VERSION
-        function exportFilteredData() {
-            const status = document.getElementById('filterStatus').value;
-            const location = document.getElementById('filterLocation').value;
-            const country = document.getElementById('filterCountry').value;
-            const fromDate = document.getElementById('filterFromDate').value;
-            const toDate = document.getElementById('filterToDate').value;
-            const agent = document.getElementById('filterAgent').value;
-            
-            const filteredData = tokenData.filter(item => {
-                const matchesStatus = status ? item.status === status : true;
-                const matchesLocation = location ? item.location === location : true;
-                const matchesCountry = country ? item.subLocation === country : true;
-                const matchesFromDate = fromDate ? item.date >= fromDate : true;
-                const matchesToDate = toDate ? item.date <= toDate : true;
-                const matchesAgent = agent ? item.agentName === agent : true;
-                
-                return matchesStatus && matchesLocation && matchesCountry && matchesFromDate && matchesToDate && matchesAgent;
-            });
-            
-            if (filteredData.length === 0) {
-                showAlert('No filtered data to export', 'warning');
-                return;
-            }
-            
-            const headers = ['ID', 'Date', 'Completion Date', 'Location', 'City/Country', 'Token', 'Client Name', 
-                            'Status', 'Charges', 'Amount Due', 'Agent', 'Executive'];
-            
-            const csvContent = [
-                headers.join(','),
-                ...filteredData.map(item => [
-                    item.id || '',
-                    `"${item.date || ''}"`,
-                    `"${item.completionDate || ''}"`,
-                    `"${item.location || ''}"`,
-                    `"${item.subLocation || ''}"`,
-                    `"${item.token || ''}"`,
-                    `"${item.clientName || ''}"`,
-                    `"${item.status || ''}"`,
-                    item.charges || 0,
-                    item.amountDue || 0,
-                    `"${item.agentName || ''}"`,
-                    `"${item.executiveName || ''}"`
-                ].join(','))
-            ].join('\n');
-            
-            downloadCSV(csvContent, 'filtered-token-data.csv');
-            showAlert('Filtered data exported as CSV successfully', 'success');
-        }
-
-        // Export agent report as CSV - FIXED VERSION
+        
+        /**
+         * CHANGE: Agent Report CSV now has specific columns.
+         */
         function exportAgentReport() {
             const agent = document.getElementById('reportAgent').value;
-            const status = document.getElementById('reportAgentStatus').value;
-            const fromDate = document.getElementById('reportAgentFromDate').value;
-            const toDate = document.getElementById('reportAgentToDate').value;
+            if (!agent) return showAlert('Please generate an agent report first', 'warning');
             
-            if (!agent) {
-                showAlert('Please generate an agent report first', 'warning');
-                return;
-            }
-            
-            let filteredData = tokenData.filter(item => item.agentName === agent);
-            
-            if (status !== 'All') {
-                filteredData = filteredData.filter(item => 
-                    status === 'Completed' ? item.status === 'Completed' : item.status !== 'Completed'
-                );
-            }
-            
-            if (fromDate) {
-                filteredData = filteredData.filter(item => item.date >= fromDate);
-            }
-            
-            if (toDate) {
-                filteredData = filteredData.filter(item => item.date <= toDate);
-            }
-            
-            if (filteredData.length === 0) {
-                showAlert('No agent report data to export', 'warning');
-                return;
-            }
-            
-            const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Client Name', 'Charges', 
-                            'Amount Due', 'Status', 'Payment Received'];
-            
+            // Re-filter data to ensure it's current
+            const filteredData = tokenData.filter(item => item.agentName === agent);
+            if (filteredData.length === 0) return showAlert('No data to export for this agent.', 'warning');
+
+            const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Charges'];
             const csvContent = [
                 headers.join(','),
                 ...filteredData.map(item => [
@@ -2259,54 +1941,25 @@
                     `"${item.completionDate || ''}"`,
                     `"${item.location || ''}"`,
                     `"${item.token || ''}"`,
-                    `"${item.clientName || ''}"`,
-                    item.charges || 0,
-                    item.amountDue || 0,
-                    `"${item.status || ''}"`,
-                    item.paymentReceived || 0
+                    item.charges || 0
                 ].join(','))
             ].join('\n');
             
             downloadCSV(csvContent, `agent-report-${agent}.csv`);
-            showAlert('Agent report exported as CSV successfully', 'success');
+            showAlert('Agent report exported', 'success');
         }
 
-        // Export executive report as CSV - FIXED VERSION
+        /**
+         * CHANGE: Executive Report CSV now has specific columns.
+         */
         function exportExecutiveReport() {
             const executive = document.getElementById('reportExecutive').value;
-            const status = document.getElementById('reportExecutiveStatus').value;
-            const fromDate = document.getElementById('reportExecutiveFromDate').value;
-            const toDate = document.getElementById('reportExecutiveToDate').value;
+            if (!executive) return showAlert('Please generate an executive report first', 'warning');
             
-            if (!executive) {
-                showAlert('Please generate an executive report first', 'warning');
-                return;
-            }
-            
-            let filteredData = tokenData.filter(item => item.executiveName === executive);
-            
-            if (status !== 'All') {
-                filteredData = filteredData.filter(item => 
-                    status === 'Completed' ? item.status === 'Completed' : item.status !== 'Completed'
-                );
-            }
-            
-            if (fromDate) {
-                filteredData = filteredData.filter(item => item.date >= fromDate);
-            }
-            
-            if (toDate) {
-                filteredData = filteredData.filter(item => item.date <= toDate);
-            }
-            
-            if (filteredData.length === 0) {
-                showAlert('No executive report data to export', 'warning');
-                return;
-            }
-            
-            const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Client Name', 'Executive Charges', 
-                            'Margin', 'Status', 'Payment Received'];
-            
+            const filteredData = tokenData.filter(item => item.executiveName === executive);
+            if (filteredData.length === 0) return showAlert('No data to export for this executive.', 'warning');
+
+            const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Executive Charges'];
             const csvContent = [
                 headers.join(','),
                 ...filteredData.map(item => [
@@ -2314,124 +1967,63 @@
                     `"${item.completionDate || ''}"`,
                     `"${item.location || ''}"`,
                     `"${item.token || ''}"`,
-                    `"${item.clientName || ''}"`,
-                    item.chargesToExecutive || 0,
-                    item.margin || 0,
-                    `"${item.status || ''}"`,
-                    item.paymentReceived || 0
+                    item.chargesToExecutive || 0
                 ].join(','))
             ].join('\n');
             
             downloadCSV(csvContent, `executive-report-${executive}.csv`);
-            showAlert('Executive report exported as CSV successfully', 'success');
+            showAlert('Executive report exported', 'success');
         }
-
-        // Export profit report as CSV - FIXED VERSION
+        
         function exportProfitReport() {
-            const agent = document.getElementById('profitAgent').value;
-            const location = document.getElementById('profitLocation').value;
-            const fromDate = document.getElementById('profitFromDate').value;
-            const toDate = document.getElementById('profitToDate').value;
-            
-            let filteredData = tokenData;
-            
-            if (agent !== 'All') {
-                filteredData = filteredData.filter(item => item.agentName === agent);
-            }
-            
-            if (location !== 'All') {
-                filteredData = filteredData.filter(item => item.location === location);
-            }
-            
-            if (fromDate) {
-                filteredData = filteredData.filter(item => item.date >= fromDate);
-            }
-            
-            if (toDate) {
-                filteredData = filteredData.filter(item => item.date <= toDate);
-            }
-            
-            if (filteredData.length === 0) {
-                showAlert('No profit report data to export', 'warning');
-                return;
-            }
-            
+            const tableBody = document.getElementById('profitTableBody');
+            if(tableBody.rows.length === 0) return showAlert('Please generate a profit report first.', 'warning');
+
             const headers = ['Date', 'Agent', 'Client', 'Location', 'Charges', 'Executive Charges', 'Margin', 'Status'];
-            
-            const csvContent = [
-                headers.join(','),
-                ...filteredData.map(item => [
-                    `"${item.date || ''}"`,
-                    `"${item.agentName || ''}"`,
-                    `"${item.clientName || ''}"`,
-                    `"${item.location || ''}"`,
-                    item.charges || 0,
-                    item.chargesToExecutive || 0,
-                    item.margin || 0,
-                    `"${item.status || ''}"`
-                ].join(','))
-            ].join('\n');
-            
-            downloadCSV(csvContent, 'profit-report.csv');
-            showAlert('Profit report exported as CSV successfully', 'success');
+            const rows = Array.from(tableBody.rows).map(row => Array.from(row.cells).map(cell => `"${cell.textContent}"`).join(','));
+            const csv = [headers.join(','), ...rows].join('\n');
+            downloadCSV(csv, 'profit-report.csv');
         }
 
-        // Download CSV file - FIXED VERSION
-        function downloadCSV(csvContent, filename) {
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        function exportFilteredData() {
+            const tableBody = document.getElementById('filteredTableBody');
+            if(tableBody.rows.length === 0) return showAlert('Please apply filters to get data first.', 'warning');
+            
+            const headers = ['ID', 'Date', 'Location', 'City/Country', 'Token', 'Client Name', 'Status', 'Charges', 'Amount Due', 'Agent', 'Executive'];
+            const rows = Array.from(tableBody.rows).map(row => Array.from(row.cells, cell => `"${cell.textContent}"`).join(','));
+            const csv = [headers.join(','), ...rows].join('\n');
+            downloadCSV(csv, 'filtered-data.csv');
+        }
+
+
+        /**
+         * CHANGE: Backup system now saves a comprehensive JSON file to the user's computer.
+         */
+        function createBackup() {
+            const backupData = {
+                tokens: tokenData,
+                users: JSON.parse(localStorage.getItem('users')),
+                settings: JSON.parse(localStorage.getItem('systemSettings')),
+                backupDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const dateStr = new Date().toISOString().split('T')[0];
+
+            link.setAttribute('href', url);
+            link.setAttribute('download', `token-system-backup-${dateStr}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
             
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }
+            showAlert('Backup file is being downloaded', 'success');
         }
 
-        // Export all data as CSV - FIXED VERSION
-        function exportAllData() {
-            const tokenHeaders = ['ID', 'Date', 'Completion Date', 'Location', 'City/Country', 'Token', 'Password', 
-                                 'Client Name', 'Contact', 'Who Will Ship', 'Client Status', 'Status', 'Forwarded',
-                                 'Charges', 'Payment Received', 'Amount Due', 'Executive Charges', 'Margin',
-                                 'Agent Name', 'Executive Name', 'Process By'];
-            
-            const tokenCSV = [
-                tokenHeaders.join(','),
-                ...tokenData.map(item => [
-                    item.id || '',
-                    `"${item.date || ''}"`,
-                    `"${item.completionDate || ''}"`,
-                    `"${item.location || ''}"`,
-                    `"${item.subLocation || ''}"`,
-                    `"${item.token || ''}"`,
-                    `"${item.password || ''}"`,
-                    `"${item.clientName || ''}"`,
-                    `"${item.contact || ''}"`,
-                    `"${item.whoWillShip || ''}"`,
-                    `"${item.contactedClient || ''}"`,
-                    `"${item.status || ''}"`,
-                    `"${item.forwarded || ''}"`,
-                    item.charges || 0,
-                    item.paymentReceived || 0,
-                    item.amountDue || 0,
-                    item.chargesToExecutive || 0,
-                    item.margin || 0,
-                    `"${item.agentName || ''}"`,
-                    `"${item.executiveName || ''}"`,
-                    `"${item.processBy || ''}"`
-                ].join(','))
-            ].join('\n');
-            
-            downloadCSV(tokenCSV, 'token-system-backup.csv');
-            showAlert('All data exported as CSV successfully', 'success');
-        }
-
-        // Import data - UPDATED VERSION
+        // Import data from JSON or CSV
         function importData() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -2440,180 +2032,53 @@
             input.onchange = e => {
                 const file = e.target.files[0];
                 const reader = new FileReader();
-                
                 reader.onload = function(event) {
                     try {
-                        const fileContent = event.target.result;
-                        
-                        if (file.name.toLowerCase().endsWith('.csv')) {
-                            // Handle CSV import
-                            const lines = fileContent.split('\n');
-                            const headers = lines[0].split(',');
-                            const data = [];
-                            
-                            for (let i = 1; i < lines.length; i++) {
-                                if (lines[i].trim()) {
-                                    const values = lines[i].split(',');
-                                    const item = {};
-                                    headers.forEach((header, index) => {
-                                        item[header.trim()] = values[index] ? values[index].replace(/"/g, '') : '';
-                                    });
-                                    data.push(item);
-                                }
+                        const content = event.target.result;
+                        if (file.name.endsWith('.json')) {
+                            const data = JSON.parse(content);
+                            if (confirm('This will overwrite existing data. Are you sure you want to restore from this backup?')) {
+                                if(data.tokens) tokenData = data.tokens;
+                                if(data.users) localStorage.setItem('users', JSON.stringify(data.users));
+                                if(data.settings) localStorage.setItem('systemSettings', JSON.stringify(data.settings));
+                                initApp(); // Re-initialize to apply all settings
+                                showAlert('Backup restored successfully!', 'success');
                             }
-                            
-                            tokenData = data;
-                            saveTokenData();
-                            renderDataTable();
-                            showAlert('CSV data imported successfully', 'success');
-                        } else {
-                            // Handle JSON import
-                            const data = JSON.parse(fileContent);
-                            
-                            if (data.tokens) {
-                                tokenData = data.tokens;
+                        } else if (file.name.endsWith('.csv')) {
+                            // Basic CSV import logic
+                            const lines = content.split('\n').filter(l => l.trim());
+                            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                            const importedTokens = lines.slice(1).map(line => {
+                                const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                                return headers.reduce((obj, header, index) => {
+                                    obj[header] = values[index] || '';
+                                    return obj;
+                                }, {});
+                            });
+
+                            if(confirm(`Found ${importedTokens.length} records. This will overwrite existing token data. Continue?`)){
+                                tokenData = importedTokens;
                                 saveTokenData();
                                 renderDataTable();
-                            } else if (Array.isArray(data)) {
-                                tokenData = data;
-                                saveTokenData();
-                                renderDataTable();
+                                showAlert('CSV data imported successfully', 'success');
                             }
-                            
-                            if (data.users) {
-                                localStorage.setItem('users', JSON.stringify(data.users));
-                                loadUsersList();
-                            }
-                            
-                            if (data.settings) {
-                                document.getElementById('defaultExecutiveName').value = data.settings.defaultExecutiveName || 'Ramnath';
-                                document.getElementById('currencySymbol').value = data.settings.currencySymbol || '₹';
-                                document.getElementById('backupInterval').value = data.settings.backupInterval || 30;
-                                document.getElementById('autoBackupEnabled').checked = data.settings.autoBackupEnabled !== false;
-                                
-                                saveSystemSettings();
-                            }
-                            
-                            showAlert('JSON data imported successfully', 'success');
                         }
-                        
-                        loadAgentsList();
-                        loadExecutivesList();
-                        
                     } catch (error) {
-                        showAlert('Error importing data: Invalid file format', 'danger');
-                        console.error('Import error:', error);
+                        showAlert('Error importing data: ' + error.message, 'danger');
                     }
                 };
-                
                 reader.readAsText(file);
             };
-            
             input.click();
-        }
-
-        // Create backup
-        function createBackup() {
-            const backup = {
-                timestamp: new Date().toISOString(),
-                data: tokenData,
-                user: currentUser,
-                version: '1.0.0'
-            };
-            
-            const backups = JSON.parse(localStorage.getItem('backups')) || [];
-            backups.push(backup);
-            
-            // Keep only last 10 backups
-            if (backups.length > 10) {
-                backups.splice(0, backups.length - 10);
-            }
-            
-            localStorage.setItem('backups', JSON.stringify(backups));
-            
-            updateBackupHistory();
-            showAlert('Backup created successfully', 'success');
-        }
-
-        // Update backup history
-        function updateBackupHistory() {
-            const backups = JSON.parse(localStorage.getItem('backups')) || [];
-            const backupHistory = document.getElementById('backupHistory');
-            
-            if (backupHistory) {
-                backupHistory.innerHTML = '';
-                
-                backups.slice(-5).reverse().forEach((backup, index) => {
-                    const date = new Date(backup.timestamp);
-                    const size = JSON.stringify(backup).length;
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${date.toLocaleString()}</td>
-                        <td>${Math.round(size / 1024)} KB</td>
-                        <td><span class="badge bg-success">Success</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-info" onclick="restoreBackup(${backups.length - 1 - index})" title="Restore">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteBackup(${backups.length - 1 - index})" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    
-                    backupHistory.appendChild(row);
-                });
-                
-                document.getElementById('lastBackupInfo').textContent = 
-                    backups.length > 0 ? 
-                    `Last backup: ${new Date(backups[backups.length-1].timestamp).toLocaleString()}` : 
-                    'No backups created yet';
-            }
-        }
-
-        // Restore backup
-        function restoreBackup(index) {
-            if (confirm('Are you sure you want to restore this backup? Current data will be replaced.')) {
-                const backups = JSON.parse(localStorage.getItem('backups')) || [];
-                const backup = backups[index];
-                
-                if (backup) {
-                    tokenData = backup.data;
-                    saveTokenData();
-                    renderDataTable();
-                    loadAgentsList();
-                    loadExecutivesList();
-                    
-                    showAlert('Backup restored successfully', 'success');
-                }
-            }
-        }
-
-        // Delete backup
-        function deleteBackup(index) {
-            if (confirm('Are you sure you want to delete this backup?')) {
-                const backups = JSON.parse(localStorage.getItem('backups')) || [];
-                backups.splice(index, 1);
-                localStorage.setItem('backups', JSON.stringify(backups));
-                
-                updateBackupHistory();
-                showAlert('Backup deleted successfully', 'success');
-            }
         }
 
         // Clear all data
         function clearAllData() {
-            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-                if (confirm('This will permanently delete all tokens, reports, and settings. Are you absolutely sure?')) {
-                    tokenData = [];
-                    saveTokenData();
-                    renderDataTable();
-                    loadAgentsList();
-                    loadExecutivesList();
-                    
-                    showAlert('All data cleared successfully', 'success');
-                }
+            if (confirm('WARNING: This will delete ALL token data permanently. Are you sure?')) {
+                tokenData = [];
+                saveTokenData();
+                renderDataTable();
+                showAlert('All token data has been cleared', 'success');
             }
         }
 
@@ -2622,159 +2087,53 @@
             const settings = {
                 defaultExecutiveName: document.getElementById('defaultExecutiveName').value,
                 currencySymbol: document.getElementById('currencySymbol').value,
-                backupInterval: parseInt(document.getElementById('backupInterval').value),
-                autoBackupEnabled: document.getElementById('autoBackupEnabled').checked
             };
-            
             localStorage.setItem('systemSettings', JSON.stringify(settings));
-            
-            // Update auto backup interval
-            setupAutoBackup();
-            
             showAlert('Settings saved successfully', 'success');
         }
 
-        // Setup auto backup
-        function setupAutoBackup() {
-            // Clear existing interval
-            if (backupIntervalId) {
-                clearInterval(backupIntervalId);
-            }
-            
-            const settings = JSON.parse(localStorage.getItem('systemSettings')) || {};
-            
-            if (settings.autoBackupEnabled !== false) {
-                const interval = (settings.backupInterval || 30) * 60 * 1000; // Convert minutes to milliseconds
-                
-                backupIntervalId = setInterval(() => {
-                    createBackup();
-                }, interval);
-            }
-        }
-
-        // Update system info
+        // Update system info pane
         function updateSystemInfo() {
             document.getElementById('totalRecords').textContent = tokenData.length;
-            
             const settings = JSON.parse(localStorage.getItem('systemSettings')) || {};
-            if (document.getElementById('defaultExecutiveName')) {
-                document.getElementById('defaultExecutiveName').value = settings.defaultExecutiveName || 'Ramnath';
-                document.getElementById('currencySymbol').value = settings.currencySymbol || '₹';
-                document.getElementById('backupInterval').value = settings.backupInterval || 30;
-                document.getElementById('autoBackupEnabled').checked = settings.autoBackupEnabled !== false;
-            }
+            document.getElementById('defaultExecutiveName').value = settings.defaultExecutiveName || 'Ramnath';
+            document.getElementById('currencySymbol').value = settings.currencySymbol || '₹';
             
-            updateBackupHistory();
+            // Calculate storage usage
+            const used = Object.keys(localStorage).map(k => localStorage[k].length * 2).reduce((a, b) => a + b, 0);
+            const total = 5 * 1024 * 1024; // 5MB limit
+            const percentage = Math.min(100, (used / total) * 100);
+            document.getElementById('storageProgressBar').style.width = percentage.toFixed(2) + '%';
+            document.getElementById('storageProgressBar').textContent = percentage.toFixed(2) + '%';
+            document.getElementById('storageUsageText').textContent = `Approximately ${(used / 1024).toFixed(2)} KB of 5 MB used`;
         }
-
-        // Show alert
+        
+        // Show alert messages
         function showAlert(message, type, elementId = 'alertContainer') {
-            // Create alert container if it doesn't exist
-            let alertContainer = document.getElementById(elementId);
-            if (!alertContainer) {
-                alertContainer = document.createElement('div');
-                alertContainer.id = elementId;
-                alertContainer.className = 'position-fixed top-0 end-0 p-3';
-                alertContainer.style.zIndex = '1050';
-                document.body.appendChild(alertContainer);
+            let container = document.getElementById(elementId);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = elementId;
+                container.className = 'position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '1050';
+                document.body.appendChild(container);
             }
             
-            const alertId = 'alert-' + Date.now();
             const alert = document.createElement('div');
-            alert.id = alertId;
             alert.className = `alert alert-${type} alert-dismissible fade show`;
-            alert.role = 'alert';
-            alert.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.appendChild(alert);
             
-            alertContainer.appendChild(alert);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                const alertElement = document.getElementById(alertId);
-                if (alertElement) {
-                    alertElement.remove();
-                }
-            }, 5000);
+            setTimeout(() => bootstrap.Alert.getOrCreateInstance(alert)?.close(), 5000);
         }
 
-        // Show about modal
-        function showAbout() {
-            const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
-            aboutModal.show();
-        }
+        function showAbout() { new bootstrap.Modal(document.getElementById('aboutModal')).show(); }
+        function refreshData() { loadTokenData(); loadAgentsList(); loadExecutivesList(); showAlert('Data refreshed', 'info'); }
 
-        // Refresh data
-        function refreshData() {
-            loadTokenData();
-            loadAgentsList();
-            loadExecutivesList();
-            showAlert('Data refreshed successfully', 'info');
-        }
-
-        // Initialize the app when the document is ready
         document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date as default
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date').value = today;
-            
+            resetForm(); // Sets today's date
             initApp();
-        });
-
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl+S to save current form
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                if (document.querySelector('#data-content').classList.contains('active')) {
-                    document.getElementById('tokenForm').dispatchEvent(new Event('submit'));
-                }
-            }
-            
-            // Ctrl+E to export data
-            if (e.ctrlKey && e.key === 'e') {
-                e.preventDefault();
-                exportData();
-            }
         });
     </script>
 </body>
-</html> {
-                        tokenData[index].status = 'Completed';
-                        tokenData[index].completionDate = new Date().toISOString().split('T')[0];
-                    }
-                });
-                
-                saveTokenData();
-                
-                if (type === 'agent') {
-                    generateAgentReport();
-                } else {
-                    generateExecutiveReport();
-                }
-                
-                showAlert(`${checkboxes.length} items marked as completed`, 'success');
-            }
-        }
-
-        // Bulk apply agent payment
-        function bulkApplyAgentPayment() {
-            const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
-            
-            if (checkboxes.length === 0) {
-                showAlert('Please select at least one item', 'warning');
-                return;
-            }
-            
-            const amount = prompt('Enter payment amount to apply:');
-            
-            if (amount && !isNaN(parseFloat(amount))) {
-                const paymentAmount = parseFloat(amount);
-                
-                checkboxes.forEach(checkbox => {
-                    const id = parseInt(checkbox.getAttribute('data-id'));
-                    const index = tokenData.findIndex(item => item.id === id);
-                    
-                    if (index !== -1)
+</html>
