@@ -1,19 +1,24 @@
 {
-  "name": "token-management-system",
+  "name": "token-management-api",
   "version": "1.0.0",
-  "description": "Token Management System",
+  "description": "Token Management System API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "install-deps": "npm install express pg cors dotenv bcryptjs"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "pg": "^8.11.0",
+    "pg": "^8.11.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
