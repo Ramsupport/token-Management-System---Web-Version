@@ -1,7 +1,0 @@
-# Database file
-tokens.db
-
-# Common Python exclusions
-__pycache__/
-.env
-venv/
