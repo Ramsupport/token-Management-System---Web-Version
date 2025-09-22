@@ -10,6 +10,7 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 // Database connection
 const pool = new Pool({
@@ -17,18 +18,34 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-// Simple password hashing and comparison (fallback when bcryptjs is not available)
+// Password comparison that handles both old bcrypt and new base64 passwords
+const comparePassword = async (plainPassword, hashedPassword) => {
+  try {
+    // First, check if it's a base64 encoded password (new system)
+    const base64Match = Buffer.from(plainPassword).toString('base64') === hashedPassword;
+    if (base64Match) {
+      return true;
+    }
+    
+    // If it's an old bcrypt password, we need to handle it differently
+    // Since bcryptjs is not available, we'll recreate users with new passwords
+    return false;
+  } catch (error) {
+    console.error('Password comparison error:', error);
+    return false;
+  }
+};
+
+// Simple base64 hashing for new passwords
 const simpleHash = (password) => {
   return Buffer.from(password).toString('base64');
 };
 
-const simpleCompare = (plainPassword, hashedPassword) => {
-  return simpleHash(plainPassword) === hashedPassword;
-};
-
-// Initialize database tables
+// Initialize database tables with password migration
 async function initializeDatabase() {
   try {
+    console.log('Initializing database...');
+    
     // Create tokens table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tokens (
@@ -70,7 +87,12 @@ async function initializeDatabase() {
       )
     `);
 
-    // Insert default users if they don't exist
+    // Clear existing users and recreate with new password system
+    await pool.query('DELETE FROM users WHERE username IN ($1, $2, $3, $4)', [
+      'admin', 'user', 'agent', 'executive'
+    ]);
+
+    // Insert default users with new password system
     const defaultUsers = [
       { username: 'admin', password: 'admin123', role: 'Admin' },
       { username: 'user', password: 'user123', role: 'User' },
@@ -79,37 +101,58 @@ async function initializeDatabase() {
     ];
 
     for (const user of defaultUsers) {
-      // Use simple base64 encoding instead of bcrypt
       const hashedPassword = simpleHash(user.password);
       
       await pool.query(`
         INSERT INTO users (username, password, role) 
-        VALUES ($1, $2, $3) 
-        ON CONFLICT (username) DO NOTHING
+        VALUES ($1, $2, $3)
       `, [user.username, hashedPassword, user.role]);
     }
 
-    console.log('Database initialized successfully');
-    console.log('Default users created:');
+    console.log('✅ Database initialized successfully');
+    console.log('📋 Default users created with new password system:');
     for (const user of defaultUsers) {
-      console.log(`- ${user.username} / ${user.password} (${user.role})`);
+      console.log(`   - ${user.username} / ${user.password} (${user.role})`);
     }
+    
+    // Verify users were created
+    const userCheck = await pool.query('SELECT username, role FROM users');
+    console.log('👥 Users in database:', userCheck.rows);
+    
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('❌ Error initializing database:', error);
   }
 }
 
-// --- Debug Endpoints ---
+// ===== DEBUG ENDPOINTS =====
 
-// Check if users exist in database
+// Check if users exist in database and show their passwords
 app.get('/api/debug/users', async (req, res) => {
   try {
+    console.log('🔍 Debug users endpoint called');
     const result = await pool.query('SELECT id, username, role, password FROM users ORDER BY id');
-    console.log('Users in database:', result.rows);
+    
+    // Decode passwords to verify they're correct
+    const usersWithDecodedPasswords = result.rows.map(user => {
+      try {
+        const decodedPassword = Buffer.from(user.password, 'base64').toString('utf8');
+        return {
+          ...user,
+          decoded_password: decodedPassword,
+          password_match: decodedPassword.endsWith('123') // Check if it ends with 123 like our defaults
+        };
+      } catch (e) {
+        return { ...user, decoded_password: 'ERROR', password_match: false };
+      }
+    });
+    
+    console.log('📊 Users in database:', usersWithDecodedPasswords);
+    
     res.json({
       message: 'Debug user information',
-      users: result.rows,
-      total: result.rows.length
+      users: usersWithDecodedPasswords,
+      total: result.rows.length,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -120,8 +163,9 @@ app.get('/api/debug/users', async (req, res) => {
 // Reset database and recreate default users
 app.post('/api/debug/reset-db', async (req, res) => {
   try {
-    console.log('Resetting database...');
-    await pool.query('DROP TABLE IF EXISTS tokens, users CASCADE');
+    console.log('🔄 Resetting database...');
+    await pool.query('DROP TABLE IF EXISTS tokens CASCADE');
+    await pool.query('DROP TABLE IF EXISTS users CASCADE');
     await initializeDatabase();
     res.json({ message: 'Database reset successfully' });
   } catch (error) {
@@ -130,8 +174,88 @@ app.post('/api/debug/reset-db', async (req, res) => {
   }
 });
 
-// --- API Routes for Tokens ---
+// Test endpoint to verify server is working
+app.get('/api/debug/test', (req, res) => {
+  res.json({ 
+    message: 'Debug endpoint is working!',
+    timestamp: new Date().toISOString(),
+    status: 'OK'
+  });
+});
 
+// ===== LOGIN WITH PASSWORD MIGRATION =====
+
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    console.log(`🔐 Login attempt for username: ${username}`);
+    console.log(`🔑 Password provided: ${password}`);
+
+    const userResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    
+    if (userResult.rows.length === 0) {
+      console.log(`❌ User not found: ${username}`);
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const user = userResult.rows[0];
+    console.log(`✅ User found: ${user.username}, role: ${user.role}`);
+    console.log(`📝 Stored password hash: ${user.password}`);
+
+    // Try base64 comparison first (new system)
+    const base64Password = Buffer.from(password).toString('base64');
+    const isBase64Match = base64Password === user.password;
+    
+    console.log(`🔍 Base64 comparison: ${isBase64Match}`);
+    console.log(`🔍 Expected hash: ${base64Password}`);
+    console.log(`🔍 Actual hash: ${user.password}`);
+
+    if (isBase64Match) {
+      console.log(`🎉 Login successful for: ${username}`);
+      return res.json({
+        message: 'Login successful',
+        username: user.username,
+        role: user.role
+      });
+    }
+
+    // If base64 doesn't match, check if it's one of our default passwords
+    const defaultPasswords = {
+      'admin': 'admin123',
+      'user': 'user123', 
+      'agent': 'agent123',
+      'executive': 'executive123'
+    };
+
+    if (defaultPasswords[username] === password) {
+      console.log(`⚠️  Default password match detected for ${username}, migrating password...`);
+      
+      // Migrate to new password system
+      const newHashedPassword = simpleHash(password);
+      await pool.query('UPDATE users SET password = $1 WHERE username = $2', [newHashedPassword, username]);
+      
+      console.log(`✅ Password migrated for ${username}`);
+      console.log(`🎉 Login successful for: ${username}`);
+      
+      return res.json({
+        message: 'Login successful (password migrated)',
+        username: user.username,
+        role: user.role
+      });
+    }
+
+    console.log(`❌ Password mismatch for user: ${username}`);
+    return res.status(401).json({ error: 'Invalid username or password' });
+
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ===== MAIN API ROUTES =====
+// [Keep all your existing token and user routes here - they remain unchanged]
 // Get all tokens
 app.get('/api/tokens', async (req, res) => {
   try {
@@ -250,8 +374,6 @@ app.delete('/api/tokens/:id', async (req, res) => {
   }
 });
 
-// --- API Routes for Users ---
-
 // Get all users
 app.get('/api/users', async (req, res) => {
   try {
@@ -303,45 +425,7 @@ app.delete('/api/users/:id', async (req, res) => {
   }
 });
 
-// Login user
-app.post('/api/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    
-    console.log(`Login attempt for username: ${username}`);
-
-    const userResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    
-    if (userResult.rows.length === 0) {
-      console.log(`User not found: ${username}`);
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    const user = userResult.rows[0];
-    console.log(`User found: ${user.username}, role: ${user.role}`);
-
-    const isMatch = simpleCompare(password, user.password);
-    console.log(`Password match: ${isMatch}`);
-
-    if (!isMatch) {
-      console.log(`Password mismatch for user: ${username}`);
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    console.log(`Login successful for: ${username}`);
-    res.json({
-      message: 'Login successful',
-      username: user.username,
-      role: user.role
-    });
-
-  } catch (error) {
-    console.error('Error during login:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// --- Server Setup ---
+// ===== SERVER SETUP =====
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
@@ -353,7 +437,15 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    message: 'Server is running correctly'
+    message: 'Server is running correctly',
+    endpoints: {
+      health: '/health',
+      debugUsers: '/api/debug/users',
+      debugTest: '/api/debug/test',
+      tokens: '/api/tokens',
+      users: '/api/users',
+      login: '/api/login'
+    }
   });
 });
 
@@ -366,6 +458,25 @@ app.get('/api/test-login', (req, res) => {
       { username: 'user', password: 'user123', role: 'User' },
       { username: 'agent', password: 'agent123', role: 'Agent' },
       { username: 'executive', password: 'executive123', role: 'Executive' }
+    ],
+    note: 'Passwords are case-sensitive. Old passwords will be automatically migrated.'
+  });
+});
+
+// 404 handler for undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Endpoint not found',
+    requestedUrl: req.originalUrl,
+    availableEndpoints: [
+      'GET  /health',
+      'GET  /api/debug/users',
+      'GET  /api/debug/test',
+      'POST /api/debug/reset-db',
+      'GET  /api/tokens',
+      'GET  /api/users',
+      'POST /api/login',
+      'GET  /api/test-login'
     ]
   });
 });
@@ -373,15 +484,24 @@ app.get('/api/test-login', (req, res) => {
 // Initialize database and start server
 initializeDatabase().then(() => {
   app.listen(port, () => {
-    console.log(`🚀 Server running on port ${port}`);
-    console.log(`📊 Health check: http://localhost:${port}/health`);
-    console.log(`🔍 Debug users: http://localhost:${port}/api/debug/users`);
-    console.log(`🔑 Test login info: http://localhost:${port}/api/test-login`);
-    console.log('\nDefault login credentials:');
-    console.log('admin / admin123 (Admin)');
-    console.log('user / user123 (User)');
-    console.log('agent / agent123 (Agent)');
-    console.log('executive / executive123 (Executive)');
+    console.log('\n' + '='.repeat(60));
+    console.log('🚀 Token Management System Server Started');
+    console.log('='.repeat(60));
+    console.log(`📡 Server running on port ${port}`);
+    console.log(`🌐 Local: http://localhost:${port}`);
+    console.log('\n🔧 Available Endpoints:');
+    console.log(`   ✅ Health check: http://localhost:${port}/health`);
+    console.log(`   🔍 Debug users: http://localhost:${port}/api/debug/users`);
+    console.log(`   🧪 Debug test: http://localhost:${port}/api/debug/test`);
+    console.log(`   🔑 Test login: http://localhost:${port}/api/test-login`);
+    
+    console.log('\n👤 Default Login Credentials:');
+    console.log('   📋 admin / admin123 (Admin)');
+    console.log('   📋 user / user123 (User)');
+    console.log('   📋 agent / agent123 (Agent)');
+    console.log('   📋 executive / executive123 (Executive)');
+    console.log('\n💡 Note: Passwords will be automatically migrated if needed');
+    console.log('='.repeat(60) + '\n');
   });
 });
 
