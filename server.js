@@ -3,6 +3,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,7 +11,6 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
 
 // Database connection
 const pool = new Pool({
@@ -71,11 +71,12 @@ async function initializeDatabase() {
     ];
 
     for (const user of defaultUsers) {
+      const hashedPassword = await bcrypt.hash(user.password, 10);
       await pool.query(`
         INSERT INTO users (username, password, role) 
         VALUES ($1, $2, $3) 
         ON CONFLICT (username) DO NOTHING
-      `, [user.username, user.password, user.role]);
+      `, [user.username, hashedPassword, user.role]);
     }
 
     console.log('Database initialized successfully');
@@ -84,7 +85,7 @@ async function initializeDatabase() {
   }
 }
 
-// API Routes
+// --- API Routes for Tokens ---
 
 // Get all tokens
 app.get('/api/tokens', async (req, res) => {
@@ -108,7 +109,8 @@ app.get('/api/tokens/:id', async (req, res) => {
     }
     
     res.json(result.rows[0]);
-  } catch (error) {
+  } catch (error)
+{
     console.error('Error fetching token:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -204,6 +206,8 @@ app.delete('/api/tokens/:id', async (req, res) => {
   }
 });
 
+// --- API Routes for Users ---
+
 // Get all users
 app.get('/api/users', async (req, res) => {
   try {
@@ -214,6 +218,80 @@ app.get('/api/users', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Create new user
+app.post('/api/users', async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result = await pool.query(`
+      INSERT INTO users (username, password, role) 
+      VALUES ($1, $2, $3) 
+      RETURNING id, username, role, status
+    `, [username, hashedPassword, role]);
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating user:', error);
+    if (error.code === '23505') { 
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete user
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Login user
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const userResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const user = userResult.rows[0];
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    res.json({
+      message: 'Login successful',
+      username: user.username,
+      role: user.role
+    });
+
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+// --- Server Setup ---
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
