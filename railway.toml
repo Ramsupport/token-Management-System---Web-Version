@@ -1,5 +1,5 @@
 [build]
-builder = "NIXPACKS"
+builder = "nixpacks"
 
 [deploy]
 startCommand = "npm start"
@@ -7,15 +7,15 @@ healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 
-# ADD THESE SERVICE DEFINITIONS:
+# Service definitions
 [services]
   [services.web]
-    name = "web-app"
-    rootDir = "./"
-    command = "npm start"
+    name = "token-management-web"
     type = "web"
+    rootDir = "."
+    command = "npm start"
 
   [services.db]
-    name = "postgres-db"
+    name = "token-management-db"
     type = "postgresql"
     version = "15"
