@@ -1121,6 +1121,29 @@
                                 </div>
                             </div>
                         </div>
+						
+						<div class="card mt-4">
+							<div class="card-header">
+								<h5 class="mb-0"><i class="fas fa-key me-2"></i>Change Password</h5>
+							</div>
+							<div class="card-body">
+								<div class="mb-3">
+									<label class="form-label">Current Password</label>
+									<input type="password" class="form-control" id="currentPassword" required>
+								</div>
+								<div class="mb-3">
+									<label class="form-label">New Password</label>
+									<input type="password" class="form-control" id="newPassword" required>
+								</div>
+								<div class="mb-3">
+									<label class="form-label">Confirm New Password</label>
+									<input type="password" class="form-control" id="confirmNewPassword" required>
+								</div>
+								<button class="btn btn-primary" onclick="changePassword()">
+									<i class="fas fa-save me-2"></i>Update Password
+								</button>
+							</div>
+						</div>
 
                         <div class="col-md-6">
                             <div class="card">
@@ -1280,31 +1303,85 @@
             document.getElementById('loadingOverlay').style.display = 'none';
         }
 
-        // API utility functions
-        async function apiRequest(endpoint, options = {}) {
-            showLoading();
-            try {
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    },
-                    ...options
-                });
+        // API utility functions - IMPROVED VERSION
+		async function apiRequest(endpoint, options = {}) {
+			showLoading();
+			try {
+				const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+					headers: {
+						'Content-Type': 'application/json',
+						...options.headers
+					},
+					...options
+				});
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
-                    throw new Error(errorData.error || `Request failed with status ${response.status}`);
-                }
+				const responseData = await response.json();
+				
+				if (!response.ok) {
+					throw new Error(responseData.error || `Request failed with status ${response.status}`);
+				}
 
-                return await response.json();
-            } catch (error) {
-                console.error('API request failed:', error);
-                throw error;
-            } finally {
-                hideLoading();
-            }
-        }
+				return responseData;
+			} catch (error) {
+				console.error('API request failed:', error);
+				throw error;
+			} finally {
+				hideLoading();
+			}
+		}
+		
+		// Add this function to test your API connection
+		async function testConnection() {
+			try {
+				const response = await fetch(`${API_BASE_URL}/health`);
+				const data = await response.json();
+				console.log('Server health:', data);
+				return true;
+			} catch (error) {
+				console.error('Connection test failed:', error);
+				showAlert('Cannot connect to server. Please check if the server is running.', 'danger', 'loginAlert');
+				return false;
+			}
+		}
+
+		// Update your login function to test connection first
+		async function handleLogin() {
+			const username = document.getElementById('loginUsername').value;
+			const password = document.getElementById('loginPassword').value;
+			
+			// Test connection first
+			if (!await testConnection()) {
+				return;
+			}
+			
+			try {
+				const response = await apiRequest('/login', {
+					method: 'POST',
+					body: JSON.stringify({ username, password })
+				});
+				
+				// Check if login was successful
+				if (response.message && response.message.includes('successful')) {
+					currentUser = response.username;
+					currentRole = response.role.toLowerCase();
+					
+					document.getElementById('loginScreen').style.display = 'none';
+					document.getElementById('mainApp').style.display = 'block';
+					
+					document.getElementById('currentUser').textContent = currentUser;
+					document.getElementById('userRole').textContent = response.role;
+					
+					updateUIForRole();
+					await initApp();
+					showAlert('Login successful! Welcome ' + currentUser, 'success', 'loginAlert');
+				} else {
+					throw new Error(response.error || 'Login failed');
+				}
+			} catch (error) {
+				console.error('Login error:', error);
+				showAlert('Login failed: ' + error.message, 'danger', 'loginAlert');
+			}
+		}
 
         // Initialize the application
         async function initApp() {
@@ -1362,33 +1439,39 @@
         }
 
         // Handle user login
-        async function handleLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            try {
-                const response = await apiRequest('/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ username, password })
-                });
-                
-                currentUser = response.username;
-                currentRole = response.role.toLowerCase(); // Ensure lowercase for consistency
-                
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                
-                document.getElementById('currentUser').textContent = currentUser;
-                document.getElementById('userRole').textContent = response.role;
-                
-                updateUIForRole();
-                await initApp();
-                showAlert('Login successful! Welcome ' + currentUser, 'success', 'loginAlert');
-            } catch (error) {
-                console.error('Login error:', error);
-                showAlert('Login failed: ' + error.message, 'danger', 'loginAlert');
-            }
-        }
+        // Handle user login - CORRECTED VERSION
+		async function handleLogin() {
+			const username = document.getElementById('loginUsername').value;
+			const password = document.getElementById('loginPassword').value;
+			
+			try {
+				const response = await apiRequest('/login', {
+					method: 'POST',
+					body: JSON.stringify({ username, password })
+				});
+				
+				// Check if login was successful based on the response structure
+				if (response.message && response.message.includes('successful')) {
+					currentUser = response.username;
+					currentRole = response.role.toLowerCase();
+					
+					document.getElementById('loginScreen').style.display = 'none';
+					document.getElementById('mainApp').style.display = 'block';
+					
+					document.getElementById('currentUser').textContent = currentUser;
+					document.getElementById('userRole').textContent = response.role;
+					
+					updateUIForRole();
+					await initApp();
+					showAlert('Login successful! Welcome ' + currentUser, 'success', 'loginAlert');
+				} else {
+					throw new Error(response.error || 'Login failed');
+				}
+			} catch (error) {
+				console.error('Login error:', error);
+				showAlert('Login failed: ' + error.message, 'danger', 'loginAlert');
+			}
+		}
 
         // Logout function
         function logout() {
@@ -1425,6 +1508,41 @@
 			} catch (error) {
 				console.error('Error loading users:', error);
 				showAlert('Could not load user list. Is the API running?', 'danger');
+			}
+		}
+		
+		// ADD THIS NEW FUNCTION to your script
+		async function changePassword() {
+			const currentPassword = document.getElementById('currentPassword').value;
+			const newPassword = document.getElementById('newPassword').value;
+			const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+			// Frontend validation
+			if (!currentPassword || !newPassword || !confirmNewPassword) {
+				return showAlert('Please fill out all password fields.', 'warning');
+			}
+			if (newPassword !== confirmNewPassword) {
+				return showAlert('New passwords do not match.', 'danger');
+			}
+
+			try {
+				const response = await apiRequest('/users/change-password', {
+					method: 'PUT',
+					body: JSON.stringify({
+						username: currentUser, // Uses the currently logged-in user
+						currentPassword: currentPassword,
+						newPassword: newPassword
+					})
+				});
+
+				showAlert(response.message, 'success');
+				// Clear the form fields after successful change
+				document.getElementById('currentPassword').value = '';
+				document.getElementById('newPassword').value = '';
+				document.getElementById('confirmNewPassword').value = '';
+
+			} catch (error) {
+				showAlert('Error: ' + error.message, 'danger');
 			}
 		}
 
