@@ -2144,40 +2144,31 @@
         
         // Show alert messages
         function showAlert(message, type, elementId = 'alertContainer') {
-            let container = document.getElementById(elementId);
-            if (!container) {
-                container = document.createElement('div');
-                container.id = elementId;
-                container.className = 'position-fixed top-0 end-0 p-3';
-                container.style.zIndex = '1050';
-                document.body.appendChild(container);
-            }
-            
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-dismissible fade show`;
-            alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-            container.appendChild(alert);
-            
-            setTimeout(() => {
-                try {
-                    bootstrap.Alert.getOrCreateInstance(alert)?.close();
-                } catch (e) {
-                    alert.remove();
-                }
-            }, 5000);
-        }
-
-        function showAbout() { 
-            new bootstrap.Modal(document.getElementById('aboutModal')).show(); 
-        }
-        
-        async function refreshData() { 
-            await loadTokenData(); 
-            await loadAgentsList(); 
-            await loadExecutivesList(); 
-            await checkConnectionStatus();
-            showAlert('Data refreshed', 'info'); 
-        }
+			let container = document.getElementById(elementId);
+			if (!container) {
+				container = document.createElement('div');
+				container.id = elementId;
+				container.className = 'position-fixed top-0 end-0 p-3';
+				container.style.zIndex = '1050';
+				document.body.appendChild(container);
+			} else {
+				// Clear existing alerts before adding a new one
+				container.innerHTML = '';
+			}
+			
+			const alert = document.createElement('div');
+			alert.className = `alert alert-${type} alert-dismissible fade show`;
+			alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+			container.appendChild(alert);
+			
+			setTimeout(() => {
+				try {
+					bootstrap.Alert.getOrCreateInstance(alert)?.close();
+				} catch (e) {
+					alert.remove();
+				}
+			}, 5000);
+		}
 
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', function() {
