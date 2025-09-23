@@ -525,15 +525,19 @@
                                         </div>
 
                                         <div class="row mb-3">
-                                            <div class="col-6">
-                                                <label class="form-label">Agent Name</label>
-                                                <input type="text" class="form-control" id="agentName">
-                                            </div>
-                                            <div class="col-6">
-                                                <label class="form-label">Executive Name</label>
-                                                <input type="text" class="form-control" id="executiveName" value="Ramnath">
-                                            </div>
-                                        </div>
+											<div class="col-6">
+												<label class="form-label">Agent Name</label>
+												<input class="form-control" list="agentDatalist" id="agentName" placeholder="Type or select an agent...">
+												<datalist id="agentDatalist">
+													</datalist>
+											</div>
+											<div class="col-6">
+												<label class="form-label">Executive Name</label>
+												<input class="form-control" list="executiveDatalist" id="executiveName" placeholder="Type or select an executive...">
+												<datalist id="executiveDatalist">
+													</datalist>
+											</div>
+										</div>
 
                                         <div class="row mb-3 admin-only-field user-only-field" style="display: none;">
                                             <div class="col-6">
@@ -1307,6 +1311,7 @@
             try {
                 await loadTokenData();
 				loadPersonnelLists();
+				populateDataEntryDropdowns(); 
                 setupEventListeners();
                 updateUIForRole();
                 await loadAgentsList();
@@ -1680,57 +1685,77 @@
 		
 		// Save token (add or update)
         async function saveToken() {
-            const tokenId = document.getElementById('tokenId').value;
-            const formData = {
-                date: document.getElementById('date').value,
-                completionDate: document.getElementById('completionDate').value,
-                location: document.getElementById('location').value,
-                subLocation: document.getElementById('location').value === 'India' ? 
-                    document.getElementById('subLocation').value : document.getElementById('countrySelect').value,
-                token: document.getElementById('token').value,
-                password: document.getElementById('password').value,
-                clientName: document.getElementById('clientName').value,
-                contact: document.getElementById('contact').value,
-                whoWillShip: document.getElementById('whoWillShip').value,
-                contactedClient: document.getElementById('contactedClient').value,
-                status: document.getElementById('status').value,
-                forwarded: document.getElementById('forwarded').value,
-                charges: parseFloat(document.getElementById('charges').value) || 0,
-                paymentReceived: parseFloat(document.getElementById('paymentReceived').value) || 0,
-                amountDue: parseFloat(document.getElementById('amountDue').value) || 0,
-                chargesToExecutive: parseFloat(document.getElementById('chargesToExecutive').value) || 0,
-                margin: parseFloat(document.getElementById('margin').value) || 0,
-                agentName: document.getElementById('agentName').value,
-                executiveName: document.getElementById('executiveName').value,
-                processBy: document.getElementById('processBy').value
-            };
-            
-            try {
-                const dbData = convertToDatabase(formData);
-                
-                if (tokenId) {
-                    await apiRequest(`/tokens/${tokenId}`, {
-                        method: 'PUT',
-                        body: JSON.stringify(dbData)
-                    });
-                    showAlert('Token updated successfully', 'success');
-                } else {
-                    await apiRequest('/tokens', {
-                        method: 'POST',
-                        body: JSON.stringify(dbData)
-                    });
-                    showAlert('Token added successfully', 'success');
-                }
-                
-                await loadTokenData();
-                resetForm();
-                await loadAgentsList();
-                await loadExecutivesList();
-            } catch (error) {
-                console.error('Error saving token:', error);
-                showAlert('Error saving token: ' + error.message, 'danger');
-            }
-        }
+			const tokenId = document.getElementById('tokenId').value;
+
+			// Check for and add new Agent/Executive names if they don't exist
+			const agentName = document.getElementById('agentName').value.trim();
+			const executiveName = document.getElementById('executiveName').value.trim();
+			let personnelListUpdated = false;
+
+			if (agentName && !agents.includes(agentName)) {
+				agents.push(agentName);
+				personnelListUpdated = true;
+			}
+			if (executiveName && !executives.includes(executiveName)) {
+				executives.push(executiveName);
+				personnelListUpdated = true;
+			}
+
+			if (personnelListUpdated) {
+				savePersonnelLists(); // This saves the new name(s) and updates all dropdowns
+			}
+			
+			// Gather all data from the form
+			const formData = {
+				date: document.getElementById('date').value,
+				completionDate: document.getElementById('completionDate').value,
+				location: document.getElementById('location').value,
+				subLocation: document.getElementById('location').value === 'India' ? 
+					document.getElementById('subLocation').value : document.getElementById('countrySelect').value,
+				token: document.getElementById('token').value,
+				password: document.getElementById('password').value,
+				clientName: document.getElementById('clientName').value,
+				contact: document.getElementById('contact').value,
+				whoWillShip: document.getElementById('whoWillShip').value,
+				contactedClient: document.getElementById('contactedClient').value,
+				status: document.getElementById('status').value,
+				forwarded: document.getElementById('forwarded').value,
+				charges: parseFloat(document.getElementById('charges').value) || 0,
+				paymentReceived: parseFloat(document.getElementById('paymentReceived').value) || 0,
+				amountDue: parseFloat(document.getElementById('amountDue').value) || 0,
+				chargesToExecutive: parseFloat(document.getElementById('chargesToExecutive').value) || 0,
+				margin: parseFloat(document.getElementById('margin').value) || 0,
+				agentName: agentName, // Use the variable to ensure it's the trimmed value
+				executiveName: executiveName, // Use the variable to ensure it's the trimmed value
+				processBy: document.getElementById('processBy').value
+			};
+			
+			try {
+				const dbData = convertToDatabase(formData);
+				
+				if (tokenId) {
+					// Update existing token
+					await apiRequest(`/tokens/${tokenId}`, {
+						method: 'PUT',
+						body: JSON.stringify(dbData)
+					});
+					showAlert('Token updated successfully', 'success');
+				} else {
+					// Add new token
+					await apiRequest('/tokens', {
+						method: 'POST',
+						body: JSON.stringify(dbData)
+					});
+					showAlert('Token added successfully', 'success');
+				}
+				
+				await loadTokenData();
+				resetForm();
+			} catch (error) {
+				console.error('Error saving token:', error);
+				showAlert('Error saving token: ' + error.message, 'danger');
+			}
+		}
 
         // Edit token
         function editToken(id) {
@@ -2476,6 +2501,23 @@
 			}
 		}
 		
+		
+		// REPLACEMENT for populateDataEntryDropdowns
+		function populateDataEntryLists() {
+			const agentDatalist = document.getElementById('agentDatalist');
+			const executiveDatalist = document.getElementById('executiveDatalist');
+
+			agentDatalist.innerHTML = '';
+			agents.forEach(name => {
+				agentDatalist.innerHTML += `<option value="${name}">`;
+			});
+
+			executiveDatalist.innerHTML = '';
+			executives.forEach(name => {
+				executiveDatalist.innerHTML += `<option value="${name}">`;
+			});
+		}
+				
 		// Data validation and cleanup
 		async function validateData() {
 			try {
