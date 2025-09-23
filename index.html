@@ -1389,28 +1389,62 @@
 			}
 		}
 
-        // Update UI based on user role
-        function updateUIForRole() {
-            // Hide all role-specific elements first
-            document.querySelectorAll('.admin-only, .user-only, .agent-only, .executive-only').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.admin-only-column, .user-only-column, .agent-only-column, .executive-only-column').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.admin-only-field, .user-only-field').forEach(el => el.style.display = 'none');
+        // REPLACEMENT CODE - USE THIS
+		function updateUIForRole() {
+			// --- Part 1: Handle role-specific columns and form fields ---
+			// Hide all role-specific elements first
+			document.querySelectorAll('.admin-only, .user-only, .agent-only, .executive-only').forEach(el => el.style.display = 'none');
+			document.querySelectorAll('.admin-only-column, .user-only-column, .agent-only-column, .executive-only-column').forEach(el => el.style.display = 'none');
+			document.querySelectorAll('.admin-only-field, .user-only-field').forEach(el => el.style.display = 'none');
 
-            // Show elements based on current role
-            const show = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = '');
+			// Helper function to show elements by selector
+			const show = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = '');
 
-            if (currentRole === 'admin') {
-                show('.admin-only, .admin-only-column, .admin-only-field');
-            } else if (currentRole === 'user') {
-                show('.user-only, .user-only-column, .user-only-field');
-            } else if (currentRole === 'agent') {
-                show('.agent-only, .agent-only-column');
-            } else if (currentRole === 'executive') {
-                show('.executive-only, .executive-only-column');
-            }
-            
-            renderDataTable();
-        }
+			// --- Part 2: Handle tab visibility ---
+			// Get references to all the tab list items
+			const filterTab = document.getElementById('filter-tab').parentElement;
+			const agentTab = document.getElementById('agent-tab').parentElement;
+			const executiveTab = document.getElementById('executive-tab').parentElement;
+			const profitTab = document.getElementById('profit-tab').parentElement;
+			const settingsTab = document.getElementById('settings-tab').parentElement;
+
+			// Hide all optional tabs by default (Data Management is always visible)
+			filterTab.style.display = 'none';
+			agentTab.style.display = 'none';
+			executiveTab.style.display = 'none';
+			profitTab.style.display = 'none';
+			settingsTab.style.display = 'none';
+
+			// --- Part 3: Apply visibility rules based on the current role ---
+			switch (currentRole) {
+				case 'admin':
+					// Admin sees everything
+					filterTab.style.display = '';
+					agentTab.style.display = '';
+					executiveTab.style.display = '';
+					profitTab.style.display = '';
+					settingsTab.style.display = '';
+					show('.admin-only, .admin-only-column, .admin-only-field');
+					break;
+				case 'user':
+					// User sees only Data Management tab and user-specific fields
+					show('.user-only, .user-only-column, .user-only-field');
+					break;
+				case 'agent':
+					// Agent sees Data Management and Agent Reports
+					agentTab.style.display = '';
+					show('.agent-only, .agent-only-column');
+					break;
+				case 'executive':
+					// Executive sees Data Management and Executive Reports
+					executiveTab.style.display = '';
+					show('.executive-only, .executive-only-column');
+					break;
+			}
+			
+			// Ensure the data table is rendered correctly with the right columns
+			renderDataTable();
+		}
 
         // Convert database field names to frontend format
         function convertFromDatabase(dbItem) {
