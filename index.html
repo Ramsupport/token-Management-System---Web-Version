@@ -746,18 +746,26 @@
 				</div>
 
                 <div class="tab-pane fade admin-only user-only agent-only" id="agent-content">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Agent Reports</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label class="form-label">Agent</label>
-                                    <select class="form-select" id="reportAgent" required>
-                                        <option value="">Select Agent</option>
-                                    </select>
-                                </div>
+					<div class="card">
+						<div class="card-header">
+							<h5 class="mb-0"><i class="fas fa-user-tie me-2"></i>Agent Reports</h5>
+						</div>
+						<div class="card-body">
+							<div class="row mb-3">
+								<div class="col-md-3">
+									<label class="form-label">Agent</label>
+									<select class="form-select" id="reportAgent" required>
+										<option value="">Select Agent</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">Status</label>
+									<select class="form-select" id="reportAgentStatus">
+										<option value="All">All</option>
+										<option value="Completed">Completed</option>
+										<option value="Incomplete">Incomplete</option>
+									</select>
+								</div>
 								<div class="col-md-2">
 									<label class="form-label">Date Type</label>
 									<select class="form-select" id="reportAgentDateType">
@@ -773,85 +781,77 @@
 									<label class="form-label">To Date</label>
 									<input type="date" class="form-control" id="reportAgentToDate">
 								</div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select" id="reportAgentStatus">
-                                        <option value="All">All</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Incomplete">Incomplete</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">From Date</label>
-                                    <input type="date" class="form-control" id="reportAgentFromDate">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">To Date</label>
-                                    <input type="date" class="form-control" id="reportAgentToDate">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">&nbsp;</label>
-                                    <div class="d-grid">
-                                        <button class="btn btn-primary" onclick="generateAgentReport()">
-                                            <i class="fas fa-chart-bar me-1"></i>Generate Report
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+								<div class="col-md-1">
+									<label class="form-label">&nbsp;</label>
+									<div class="d-grid">
+										<button class="btn btn-primary" onclick="generateAgentReport()">
+											<i class="fas fa-chart-bar me-1"></i>Generate
+										</button>
+									</div>
+								</div>
+							</div>
 
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-success admin-only user-only" style="display: none;" onclick="bulkApplyAgentPayment()">
-                                            <i class="fas fa-money-check-alt me-1"></i>Apply Payment (All)
-                                        </button>
-                                        <button class="btn btn-info" onclick="markAllCompleted('agent')">
-                                            <i class="fas fa-check-circle me-1"></i>Mark All Completed
-                                        </button>
-                                        <button class="btn btn-warning admin-only user-only" style="display: none;" onclick="exportAgentReport()">
-                                            <i class="fas fa-file-export me-1"></i>Export CSV
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+							<div class="row mb-3">
+								<div class="col-12">
+									<div class="btn-group" role="group">
+										<button class="btn btn-success admin-only user-only" style="display: none;" onclick="bulkApplyAgentPayment()">
+											<i class="fas fa-money-check-alt me-1"></i>Apply Payment (All)
+										</button>
+										<button class="btn btn-info" onclick="markAllCompleted('agent')">
+											<i class="fas fa-check-circle me-1"></i>Mark All Completed
+										</button>
+										<button class="btn btn-warning admin-only user-only" style="display: none;" onclick="exportAgentReport()">
+											<i class="fas fa-file-export me-1"></i>Export CSV
+										</button>
+									</div>
+								</div>
+							</div>
 
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="agentReportTable">
-                                    <thead>
-                                        <tr>
-                                            <th><input type="checkbox" id="selectAllAgent" onchange="toggleSelectAll('agent')"></th>
-                                            <th>Date</th>
-                                            <th>Completion Date</th>
-                                            <th>Location</th>
-                                            <th>Token</th>
-                                            <th>Client Name</th>
-                                            <th class="admin-only-column user-only-column" style="display: none;">Charges</th>
-                                            <th class="admin-only-column user-only-column agent-only-column" style="display: none;">Amount Due</th>
-                                            <th>Status</th>
-                                            <th class="admin-only-column user-only-column" style="display: none;">Payment Applied</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="agentReportBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+							<div class="table-responsive">
+								<table class="table table-striped" id="agentReportTable">
+									<thead>
+										<tr>
+											<th><input type="checkbox" id="selectAllAgent" onchange="toggleSelectAll('agent')"></th>
+											<th>Token Date</th>
+											<th>Completion Date</th>
+											<th>Location</th>
+											<th>Token</th>
+											<th>Client Name</th>
+											<th class="admin-only-column user-only-column" style="display: none;">Charges</th>
+											<th class="admin-only-column user-only-column agent-only-column" style="display: none;">Amount Due</th>
+											<th>Status</th>
+											<th class="admin-only-column user-only-column" style="display: none;">Payment Applied</th>
+										</tr>
+									</thead>
+									<tbody id="agentReportBody">
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 
                 <div class="tab-pane fade admin-only executive-only" id="executive-content">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Executive Reports</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label class="form-label">Executive</label>
-                                    <select class="form-select" id="reportExecutive" required>
-                                        <option value="">Select Executive</option>
-                                    </select>
-                                </div>
+					<div class="card">
+						<div class="card-header">
+							<h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Executive Reports</h5>
+						</div>
+						<div class="card-body">
+							<div class="row mb-3">
+								<div class="col-md-3">
+									<label class="form-label">Executive</label>
+									<select class="form-select" id="reportExecutive" required>
+										<option value="">Select Executive</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">Status</label>
+									<select class="form-select" id="reportExecutiveStatus">
+										<option value="All">All</option>
+										<option value="Completed">Completed</option>
+										<option value="Incomplete">Incomplete</option>
+									</select>
+								</div>
 								<div class="col-md-2">
 									<label class="form-label">Date Type</label>
 									<select class="form-select" id="reportExecutiveDateType">
@@ -867,71 +867,55 @@
 									<label class="form-label">To Date</label>
 									<input type="date" class="form-control" id="reportExecutiveToDate">
 								</div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select" id="reportExecutiveStatus">
-                                        <option value="All">All</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Incomplete">Incomplete</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">From Date</label>
-                                    <input type="date" class="form-control" id="reportExecutiveFromDate">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">To Date</label>
-                                    <input type="date" class="form-control" id="reportExecutiveToDate">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">&nbsp;</label>
-                                    <div class="d-grid">
-                                        <button class="btn btn-primary" onclick="generateExecutiveReport()">
-                                            <i class="fas fa-chart-bar me-1"></i>Generate Report
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+								<div class="col-md-1">
+									<label class="form-label">&nbsp;</label>
+									<div class="d-grid">
+										<button class="btn btn-primary" onclick="generateExecutiveReport()">
+											<i class="fas fa-chart-bar me-1"></i>Generate
+										</button>
+									</div>
+								</div>
+							</div>
 
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-success" onclick="bulkApplyExecutivePayment()">
-                                            <i class="fas fa-money-check-alt me-1"></i>Apply Payment (All)
-                                        </button>
-                                        <button class="btn btn-info" onclick="markAllCompleted('executive')">
-                                            <i class="fas fa-check-circle me-1"></i>Mark All Completed
-                                        </button>
-                                        <button class="btn btn-warning" onclick="exportExecutiveReport()">
-                                            <i class="fas fa-file-export me-1"></i>Export CSV
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+							<div class="row mb-3">
+								<div class="col-12">
+									<div class="btn-group" role="group">
+										<button class="btn btn-success" onclick="bulkApplyExecutivePayment()">
+											<i class="fas fa-money-check-alt me-1"></i>Apply Payment (All)
+										</button>
+										<button class="btn btn-info" onclick="markAllCompleted('executive')">
+											<i class="fas fa-check-circle me-1"></i>Mark All Completed
+										</button>
+										<button class="btn btn-warning" onclick="exportExecutiveReport()">
+											<i class="fas fa-file-export me-1"></i>Export CSV
+										</button>
+									</div>
+								</div>
+							</div>
 
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="executiveReportTable">
-                                    <thead>
-                                        <tr>
-                                            <th><input type="checkbox" id="selectAllExecutive" onchange="toggleSelectAll('executive')"></th>
-                                            <th>Date</th>
-                                            <th>Completion Date</th>
-                                            <th>Location</th>
-                                            <th>Token</th>
-                                            <th>Client Name</th>
-                                            <th class="admin-only-column executive-only-column" style="display: none;">Executive Charges</th>
-                                            <th class="admin-only-column" style="display: none;">Margin</th>
-                                            <th>Status</th>
-                                            <th>Payment Applied</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="executiveReportBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+							<div class="table-responsive">
+								<table class="table table-striped" id="executiveReportTable">
+									<thead>
+										<tr>
+											<th><input type="checkbox" id="selectAllExecutive" onchange="toggleSelectAll('executive')"></th>
+											<th>Token Date</th>
+											<th>Completion Date</th>
+											<th>Location</th>
+											<th>Token</th>
+											<th>Client Name</th>
+											<th class="admin-only-column executive-only-column" style="display: none;">Executive Charges</th>
+											<th class="admin-only-column" style="display: none;">Margin</th>
+											<th>Status</th>
+											<th>Payment Applied</th>
+										</tr>
+									</thead>
+									<tbody id="executiveReportBody">
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 
                 <div class="tab-pane fade admin-only" id="profit-content">
                     <div class="card">
@@ -1656,22 +1640,40 @@
 			const fromDate = document.getElementById('filterFromDate').value;
 			const toDate = document.getElementById('filterToDate').value;
 			const agent = document.getElementById('filterAgent').value;
-			const executive = document.getElementById('filterExecutive').value;
 			
 			const filteredData = tokenData.filter(item => {
 				const convertedItem = convertFromDatabase(item);
-				const dateField = dateType === 'completionDate' ? convertedItem.completionDate : convertedItem.date;
+				
+				// Get the raw date value for filtering (not the formatted display value)
+				let dateFieldValue;
+				if (dateType === 'completionDate') {
+					dateFieldValue = convertedItem.completionDate; // YYYY-MM-DD format
+				} else {
+					dateFieldValue = convertedItem.date; // YYYY-MM-DD format
+				}
+				
+				// Handle empty completion dates
+				if (dateType === 'completionDate' && !dateFieldValue) {
+					// If filtering by completion date but no completion date exists, exclude this item
+					return false;
+				}
 				
 				return (status ? convertedItem.status === status : true) &&
 					   (location ? convertedItem.location === location : true) &&
 					   (country ? convertedItem.subLocation === country : true) &&
-					   (fromDate ? dateField >= fromDate : true) &&
-					   (toDate ? dateField <= toDate : true) &&
-					   (agent ? convertedItem.agentName === agent : true) &&
-					   (executive ? convertedItem.executiveName === executive : true);
+					   (fromDate ? dateFieldValue >= fromDate : true) &&
+					   (toDate ? dateFieldValue <= toDate : true) &&
+					   (agent ? convertedItem.agentName === agent : true);
 			});
 			
 			renderFilteredTable(filteredData);
+			
+			// Show result count
+			if (filteredData.length === 0) {
+				showAlert('No records found matching your filters', 'warning');
+			} else {
+				showAlert(`Found ${filteredData.length} records matching your filters`, 'success');
+			}
 		}
 
 		// Clear filters function
