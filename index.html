@@ -1073,7 +1073,7 @@
                                         <label class="form-label">Add New User</label>
                                         <div class="input-group mb-3">
                                             <input type="text" class="form-control" id="newUsername" placeholder="Username">
-                                            <input type="password" class="form-control" id="newPassword" placeholder="Password">
+                                            <input type="password" class="form-control" id="addUserPassword" placeholder="Password">
                                             <select class="form-select" id="newUserRole">
                                                 <option value="User">User</option>
                                                 <option value="Agent">Agent</option>
@@ -2142,7 +2142,7 @@
         // Add new user
         async function addNewUser() {
             const username = document.getElementById('newUsername').value.trim();
-            const password = document.getElementById('newPassword').value;
+			const password = document.getElementById('addUserPassword').value;
             const role = document.getElementById('newUserRole').value;
             
             if (!username || !password) {
