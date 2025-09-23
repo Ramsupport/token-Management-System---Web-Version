@@ -1278,39 +1278,32 @@
 
         // Handle user login
         async function handleLogin() {
-			const username = document.getElementById('loginUsername').value;
-			const password = document.getElementById('loginPassword').value;
-
-			try {
-				const response = await fetch('/api/login', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ username, password })
-				});
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					throw new Error(data.error || 'Login failed');
-				}
-
-				currentUser = data.username;
-				currentRole = data.role;
-				
-				document.getElementById('loginScreen').style.display = 'none';
-				document.getElementById('mainApp').style.display = 'block';
-				
-				// THIS LINE IS NOW CORRECTED
-				showAlert('Login successful! Welcome ' + currentUser, 'success', 'loginAlert');
-				
-				updateUIForRole();
-				await loadTokenData();
-
-			} catch (error) {
-				console.error('Login error:', error);
-				showAlert(error.message, 'danger', 'loginAlert');
-			}
-		}
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await apiRequest('/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                currentUser = response.username;
+                currentRole = response.role.toLowerCase(); // Ensure lowercase for consistency
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                document.getElementById('currentUser').textContent = currentUser;
+                document.getElementById('userRole').textContent = response.role;
+                
+                updateUIForRole();
+                await initApp();
+                showAlert('Login successful! Welcome ' + currentUser, 'success', 'loginAlert');
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Login failed: ' + error.message, 'danger', 'loginAlert');
+            }
+        }
 
         // Logout function
         function logout() {
