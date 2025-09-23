@@ -28,6 +28,7 @@ async function initializeDatabase() {
   try {
     console.log('Initializing database...');
     
+    // Create tokens table WITHOUT the UNIQUE constraint
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tokens (
         id SERIAL PRIMARY KEY, date DATE, completion_date DATE, location VARCHAR(50), sub_location VARCHAR(100),
@@ -39,21 +40,12 @@ async function initializeDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
 
-    // Remove unique constraint if it exists (this allows duplicate token numbers)
-    try {
-      await pool.query('ALTER TABLE tokens DROP CONSTRAINT IF EXISTS tokens_token_key');
-      console.log('✅ Unique constraint removed from tokens table');
-    } catch (error) {
-      console.log('ℹ️ Unique constraint already removed or does not exist');
-    }
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE, password VARCHAR(255),
         role VARCHAR(20), status VARCHAR(20) DEFAULT 'Active', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
 
-    // --- ADDED: Create agents and executives tables ---
     await pool.query(`
       CREATE TABLE IF NOT EXISTS agents (
         id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -86,7 +78,6 @@ async function initializeDatabase() {
     console.error('❌ Error initializing database:', error);
   }
 }
-
 // ===== DEBUG ENDPOINTS (Preserved from your original file) =====
 app.get('/api/debug/users', async (req, res) => {
   try {
