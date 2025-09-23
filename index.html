@@ -1996,7 +1996,7 @@
         }
 
         // Apply filters for the filter tab
-		// ✅ CORRECTED CODE - Replace the entire applyFilters function
+		// ✅ CORRECTED applyFilters function
 		function applyFilters() {
 			const status = document.getElementById('filterStatus').value;
 			const location = document.getElementById('filterLocation').value;
@@ -2027,13 +2027,30 @@
 				const executiveMatch = executive === "All" ? true : 
 									  executive ? convertedItem.executiveName === executive : true;
 				
+				// Fix for date filtering - convert to Date objects for proper comparison
+				let dateMatch = true;
+				if (fromDate || toDate) {
+					const itemDate = new Date(dateFieldValue);
+					
+					if (fromDate) {
+						const fromDateObj = new Date(fromDate);
+						if (itemDate < fromDateObj) return false;
+					}
+					
+					if (toDate) {
+						const toDateObj = new Date(toDate);
+						// Add one day to include the toDate in the range
+						toDateObj.setDate(toDateObj.getDate() + 1);
+						if (itemDate >= toDateObj) return false;
+					}
+				}
+				
 				return (status ? convertedItem.status === status : true) &&
 					   (location ? convertedItem.location === location : true) &&
 					   (country ? convertedItem.subLocation === country : true) &&
-					   (fromDate ? dateFieldValue >= fromDate : true) &&
-					   (toDate ? dateFieldValue <= toDate : true) &&
+					   dateMatch &&
 					   agentMatch &&
-					   executiveMatch; // ✅ Now properly used
+					   executiveMatch;
 			});
 			
 			renderFilteredTable(filteredData);
@@ -2044,6 +2061,7 @@
 				showAlert(`Found ${filteredData.length} records matching your filters`, 'success');
 			}
 		}
+		
 		// Clear filters function
 		function clearFilters() {
 			document.getElementById('filterStatus').value = '';
@@ -2179,7 +2197,7 @@
             }
         }
 
-        // Generate and render agent report
+        // ✅ CORRECTED generateAgentReport function
 		function generateAgentReport() {
 			const agent = document.getElementById('reportAgent').value;
 			const status = document.getElementById('reportAgentStatus').value;
@@ -2201,7 +2219,7 @@
 					if (status === 'Incomplete' && converted.status === 'Completed') return false;
 				}
 				
-				// Check date filter
+				// Check date filter - FIXED DATE COMPARISON
 				if (fromDate || toDate) {
 					let dateFieldValue;
 					if (dateType === 'completionDate') {
@@ -2212,8 +2230,18 @@
 						dateFieldValue = converted.date;
 					}
 					
-					if (fromDate && dateFieldValue < fromDate) return false;
-					if (toDate && dateFieldValue > toDate) return false;
+					const itemDate = new Date(dateFieldValue);
+					
+					if (fromDate) {
+						const fromDateObj = new Date(fromDate);
+						if (itemDate < fromDateObj) return false;
+					}
+					
+					if (toDate) {
+						const toDateObj = new Date(toDate);
+						toDateObj.setDate(toDateObj.getDate() + 1); // Include the toDate
+						if (itemDate >= toDateObj) return false;
+					}
 				}
 				
 				return true;
@@ -2248,7 +2276,7 @@
 			});
 		}
 
-		// Generate and render executive report
+		// ✅ CORRECTED generateExecutiveReport function
 		function generateExecutiveReport() {
 			const executive = document.getElementById('reportExecutive').value;
 			const status = document.getElementById('reportExecutiveStatus').value;
@@ -2270,7 +2298,7 @@
 					if (status === 'Incomplete' && converted.status === 'Completed') return false;
 				}
 				
-				// Check date filter
+				// Check date filter - FIXED DATE COMPARISON
 				if (fromDate || toDate) {
 					let dateFieldValue;
 					if (dateType === 'completionDate') {
@@ -2281,8 +2309,18 @@
 						dateFieldValue = converted.date;
 					}
 					
-					if (fromDate && dateFieldValue < fromDate) return false;
-					if (toDate && dateFieldValue > toDate) return false;
+					const itemDate = new Date(dateFieldValue);
+					
+					if (fromDate) {
+						const fromDateObj = new Date(fromDate);
+						if (itemDate < fromDateObj) return false;
+					}
+					
+					if (toDate) {
+						const toDateObj = new Date(toDate);
+						toDateObj.setDate(toDateObj.getDate() + 1); // Include the toDate
+						if (itemDate >= toDateObj) return false;
+					}
 				}
 				
 				return true;
@@ -2294,7 +2332,7 @@
 			if (filteredData.length === 0) {
 				showAlert('No records found matching your filters', 'warning');
 			} else {
-				showAlert(`Found ${filteredData.length} records matching your filters`, 'success');
+				showAlert(`Found ${filteredData.length} records matching your filters', 'success`);
 			}
 		}
 
