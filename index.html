@@ -758,6 +758,21 @@
                                         <option value="">Select Agent</option>
                                     </select>
                                 </div>
+								<div class="col-md-2">
+									<label class="form-label">Date Type</label>
+									<select class="form-select" id="reportAgentDateType">
+										<option value="date">Token Date</option>
+										<option value="completionDate">Completion Date</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">From Date</label>
+									<input type="date" class="form-control" id="reportAgentFromDate">
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">To Date</label>
+									<input type="date" class="form-control" id="reportAgentToDate">
+								</div>
                                 <div class="col-md-2">
                                     <label class="form-label">Status</label>
                                     <select class="form-select" id="reportAgentStatus">
@@ -837,6 +852,21 @@
                                         <option value="">Select Executive</option>
                                     </select>
                                 </div>
+								<div class="col-md-2">
+									<label class="form-label">Date Type</label>
+									<select class="form-select" id="reportExecutiveDateType">
+										<option value="date">Token Date</option>
+										<option value="completionDate">Completion Date</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">From Date</label>
+									<input type="date" class="form-control" id="reportExecutiveFromDate">
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">To Date</label>
+									<input type="date" class="form-control" id="reportExecutiveToDate">
+								</div>
                                 <div class="col-md-2">
                                     <label class="form-label">Status</label>
                                     <select class="form-select" id="reportExecutiveStatus">
@@ -1794,47 +1824,50 @@
 
         // Generate and render agent report
         function generateAgentReport() {
-            const agent = document.getElementById('reportAgent').value;
-            const status = document.getElementById('reportAgentStatus').value;
-            const fromDate = document.getElementById('reportAgentFromDate').value;
-            const toDate = document.getElementById('reportAgentToDate').value;
-            
-            if (!agent) return showAlert('Please select an agent', 'danger');
-            
-            const filteredData = tokenData.filter(item => {
-                const converted = convertFromDatabase(item);
-                return converted.agentName === agent &&
-                       (status === 'All' ? true : (status === 'Completed' ? converted.status === 'Completed' : converted.status !== 'Completed')) &&
-                       (fromDate ? converted.date >= fromDate : true) &&
-                       (toDate ? converted.date <= toDate : true);
-            });
-            renderAgentReport(filteredData);
-        }
+			const agent = document.getElementById('reportAgent').value;
+			const status = document.getElementById('reportAgentStatus').value;
+			const dateType = document.getElementById('reportAgentDateType').value;
+			const fromDate = document.getElementById('reportAgentFromDate').value;
+			const toDate = document.getElementById('reportAgentToDate').value;
+			
+			if (!agent) return showAlert('Please select an agent', 'danger');
+			
+			const filteredData = tokenData.filter(item => {
+				const converted = convertFromDatabase(item);
+				const dateField = dateType === 'completionDate' ? converted.completionDate : converted.date;
+				
+				return converted.agentName === agent &&
+					   (status === 'All' ? true : (status === 'Completed' ? converted.status === 'Completed' : converted.status !== 'Completed')) &&
+					   (fromDate ? dateField >= fromDate : true) &&
+					   (toDate ? dateField <= toDate : true);
+			});
+			renderAgentReport(filteredData);
+		}
 
         // Render agent report table
-        function renderAgentReport(data) {
-            const tableBody = document.getElementById('agentReportBody');
-            tableBody.innerHTML = data.map(item => {
-                const converted = convertFromDatabase(item);
-                const chargesDisplay = converted.charges ? `₹${converted.charges}` : '-';
-                const amountDueDisplay = converted.amountDue ? `₹${converted.amountDue}` : '-';
-                const paymentDisplay = converted.paymentReceived ? `₹${converted.paymentReceived}` : 'No';
-                return `
-                    <tr>
-                        <td><input type="checkbox" class="agent-checkbox" data-id="${converted.id}"></td>
-                        <td>${formatDate(converted.date)}</td>
+				function renderAgentReport(data) {
+			const tableBody = document.getElementById('agentReportBody');
+			tableBody.innerHTML = data.map(item => {
+				const converted = convertFromDatabase(item);
+				const chargesDisplay = converted.charges ? `₹${converted.charges}` : '-';
+				const amountDueDisplay = converted.amountDue ? `₹${converted.amountDue}` : '-';
+				const paymentDisplay = converted.paymentReceived ? `₹${converted.paymentReceived}` : 'No';
+				return `
+					<tr>
+						<td><input type="checkbox" class="agent-checkbox" data-id="${converted.id}"></td>
+						<td>${formatDate(converted.date)}</td>
 						<td>${formatDate(converted.completionDate) || '-'}</td>
-                        <td>${converted.location}</td>
-                        <td>${converted.token}</td>
-                        <td>${converted.clientName}</td>
-                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
-                        <td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
-                        <td><span class="badge ${converted.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${converted.status}</span></td>
-                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${paymentDisplay}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
+						<td>${converted.location}</td>
+						<td>${converted.token}</td>
+						<td>${converted.clientName}</td>
+						<td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
+						<td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
+						<td><span class="badge ${converted.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${converted.status}</span></td>
+						<td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${paymentDisplay}</td>
+					</tr>
+				`;
+			}).join('');
+		}
 
         // Toggle select all checkboxes
         function toggleSelectAll(type) {
@@ -1844,47 +1877,50 @@
 
         // Generate and render executive report
         function generateExecutiveReport() {
-            const executive = document.getElementById('reportExecutive').value;
-            const status = document.getElementById('reportExecutiveStatus').value;
-            const fromDate = document.getElementById('reportExecutiveFromDate').value;
-            const toDate = document.getElementById('reportExecutiveToDate').value;
-            
-            if (!executive) return showAlert('Please select an executive', 'danger');
-            
-            const filteredData = tokenData.filter(item => {
-                const converted = convertFromDatabase(item);
-                return converted.executiveName === executive &&
-                       (status === 'All' ? true : (status === 'Completed' ? converted.status === 'Completed' : converted.status !== 'Completed')) &&
-                       (fromDate ? converted.date >= fromDate : true) &&
-                       (toDate ? converted.date <= toDate : true);
-            });
-            renderExecutiveReport(filteredData);
-        }
+			const executive = document.getElementById('reportExecutive').value;
+			const status = document.getElementById('reportExecutiveStatus').value;
+			const dateType = document.getElementById('reportExecutiveDateType').value;
+			const fromDate = document.getElementById('reportExecutiveFromDate').value;
+			const toDate = document.getElementById('reportExecutiveToDate').value;
+			
+			if (!executive) return showAlert('Please select an executive', 'danger');
+			
+			const filteredData = tokenData.filter(item => {
+				const converted = convertFromDatabase(item);
+				const dateField = dateType === 'completionDate' ? converted.completionDate : converted.date;
+				
+				return converted.executiveName === executive &&
+					   (status === 'All' ? true : (status === 'Completed' ? converted.status === 'Completed' : converted.status !== 'Completed')) &&
+					   (fromDate ? dateField >= fromDate : true) &&
+					   (toDate ? dateField <= toDate : true);
+			});
+			renderExecutiveReport(filteredData);
+		}
 
         // Render executive report table
         function renderExecutiveReport(data) {
-            const tableBody = document.getElementById('executiveReportBody');
-            tableBody.innerHTML = data.map(item => {
-                const converted = convertFromDatabase(item);
-                const executiveChargesDisplay = converted.chargesToExecutive ? `₹${converted.chargesToExecutive}` : '-';
-                const marginDisplay = converted.margin ? `₹${converted.margin}` : '-';
-                const paymentDisplay = converted.paymentReceived ? 'Yes' : 'No';
-                return `
-                    <tr>
-                        <td><input type="checkbox" class="executive-checkbox" data-id="${converted.id}"></td>
-                        <td>${formatDate(converted.date)}</td>
+			const tableBody = document.getElementById('executiveReportBody');
+			tableBody.innerHTML = data.map(item => {
+				const converted = convertFromDatabase(item);
+				const executiveChargesDisplay = converted.chargesToExecutive ? `₹${converted.chargesToExecutive}` : '-';
+				const marginDisplay = converted.margin ? `₹${converted.margin}` : '-';
+				const paymentDisplay = converted.paymentReceived ? 'Yes' : 'No';
+				return `
+					<tr>
+						<td><input type="checkbox" class="executive-checkbox" data-id="${converted.id}"></td>
+						<td>${formatDate(converted.date)}</td>
 						<td>${formatDate(converted.completionDate) || '-'}</td>
-                        <td>${converted.location}</td>
-                        <td>${converted.token}</td>
-                        <td>${converted.clientName}</td>
-                        <td class="admin-only-column executive-only-column" style="display: ${['admin', 'executive'].includes(currentRole) ? '' : 'none'}">${executiveChargesDisplay}</td>
-                        <td class="admin-only-column" style="display: ${currentRole === 'admin' ? '' : 'none'}">${marginDisplay}</td>
-                        <td><span class="badge ${converted.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${converted.status}</span></td>
-                        <td>${paymentDisplay}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
+						<td>${converted.location}</td>
+						<td>${converted.token}</td>
+						<td>${converted.clientName}</td>
+						<td class="admin-only-column executive-only-column" style="display: ${['admin', 'executive'].includes(currentRole) ? '' : 'none'}">${executiveChargesDisplay}</td>
+						<td class="admin-only-column" style="display: ${currentRole === 'admin' ? '' : 'none'}">${marginDisplay}</td>
+						<td><span class="badge ${converted.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${converted.status}</span></td>
+						<td>${paymentDisplay}</td>
+					</tr>
+				`;
+			}).join('');
+		}
 
         // Generate and render profit report
         function generateProfitReport() {
