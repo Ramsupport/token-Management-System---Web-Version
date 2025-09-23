@@ -830,7 +830,7 @@
 						</div>
 					</div>
 				</div>
-
+				
                 <div class="tab-pane fade admin-only executive-only" id="executive-content">
 					<div class="card">
 						<div class="card-header">
@@ -1361,6 +1361,33 @@
             document.getElementById('loginForm').reset();
             showAlert('You have been logged out', 'info', 'loginAlert');
         }
+		
+		async function loadUsersList() {
+			try {
+				// 1. Fetch the list of users from the API
+				const users = await apiRequest('/users');
+				const tableBody = document.getElementById('usersTableBody');
+				
+				// 2. Build the HTML for the table rows and display them
+				tableBody.innerHTML = users.map(user => `
+					<tr>
+						<td>${user.username}</td>
+						<td><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></td>
+						<td>
+							${user.username !== currentUser ? 
+								`<button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">
+									<i class="fas fa-trash"></i>
+								 </button>` : 
+								''
+							}
+						</td>
+					</tr>
+				`).join('');
+			} catch (error) {
+				console.error('Error loading users:', error);
+				showAlert('Could not load user list. Is the API running?', 'danger');
+			}
+		}
 
         // Update UI based on user role
         function updateUIForRole() {
@@ -1632,6 +1659,7 @@
         }
 
         // Apply filters for the filter tab
+		// ✅ CORRECTED CODE - Replace the entire applyFilters function
 		function applyFilters() {
 			const status = document.getElementById('filterStatus').value;
 			const location = document.getElementById('filterLocation').value;
@@ -1640,42 +1668,45 @@
 			const fromDate = document.getElementById('filterFromDate').value;
 			const toDate = document.getElementById('filterToDate').value;
 			const agent = document.getElementById('filterAgent').value;
+			const executive = document.getElementById('filterExecutive').value;
 			
 			const filteredData = tokenData.filter(item => {
 				const convertedItem = convertFromDatabase(item);
 				
-				// Get the raw date value for filtering (not the formatted display value)
+				// Get the raw date value for filtering
 				let dateFieldValue;
 				if (dateType === 'completionDate') {
-					dateFieldValue = convertedItem.completionDate; // YYYY-MM-DD format
+					dateFieldValue = convertedItem.completionDate;
+					if (!dateFieldValue) return false; // Exclude if no completion date
 				} else {
-					dateFieldValue = convertedItem.date; // YYYY-MM-DD format
+					dateFieldValue = convertedItem.date;
 				}
 				
-				// Handle empty completion dates
-				if (dateType === 'completionDate' && !dateFieldValue) {
-					// If filtering by completion date but no completion date exists, exclude this item
-					return false;
-				}
+				// Fix for agent filter
+				const agentMatch = agent === "All" ? true : 
+								  agent ? convertedItem.agentName === agent : true;
+				
+				// Fix for executive filter
+				const executiveMatch = executive === "All" ? true : 
+									  executive ? convertedItem.executiveName === executive : true;
 				
 				return (status ? convertedItem.status === status : true) &&
 					   (location ? convertedItem.location === location : true) &&
 					   (country ? convertedItem.subLocation === country : true) &&
 					   (fromDate ? dateFieldValue >= fromDate : true) &&
 					   (toDate ? dateFieldValue <= toDate : true) &&
-					   (agent ? convertedItem.agentName === agent : true);
+					   agentMatch &&
+					   executiveMatch; // ✅ Now properly used
 			});
 			
 			renderFilteredTable(filteredData);
 			
-			// Show result count
 			if (filteredData.length === 0) {
 				showAlert('No records found matching your filters', 'warning');
 			} else {
 				showAlert(`Found ${filteredData.length} records matching your filters`, 'success');
 			}
 		}
-
 		// Clear filters function
 		function clearFilters() {
 			document.getElementById('filterStatus').value = '';
@@ -1690,18 +1721,16 @@
 			renderFilteredTable([]);
 		}
 
-        // Clear filters
-        function clearFilters() {
-            document.getElementById('filterStatus').value = '';
-            document.getElementById('filterLocation').value = '';
-            document.getElementById('filterCountry').value = '';
-            document.getElementById('filterFromDate').value = '';
-            document.getElementById('filterToDate').value = '';
-            document.getElementById('filterAgent').value = '';
-            updateFilterLocationField();
-            renderFilteredTable([]);
-        }
-
+		// ✅ ADD THIS FUNCTION
+		function toggleSelectAll(type) {
+			const selectAllCheckbox = document.getElementById(`selectAll${type.charAt(0).toUpperCase() + type.slice(1)}`);
+			const checkboxes = document.querySelectorAll(`.${type}-checkbox`);
+			
+			checkboxes.forEach(checkbox => {
+				checkbox.checked = selectAllCheckbox.checked;
+			});
+		}
+			   
         // Render filtered table
 		function renderFilteredTable(data) {
 			const tableBody = document.getElementById('filteredTableBody');
@@ -1755,34 +1784,36 @@
         }
 
         async function loadAgentsList() { 
-            loadUniqueNames('agentName', ['filterAgent', 'reportAgent', 'profitAgent'], 'All Agents', 'Select Agent'); 
-        }
-        
-        async function loadExecutivesList() { 
-            loadUniqueNames('executiveName', ['reportExecutive'], null, 'Select Executive'); 
-        }
-
-        // Load users list for settings
-        async function loadUsersList() {
-            try {
-                const users = await apiRequest('/users');
-                const usersTableBody = document.getElementById('usersTableBody');
-                
-                if (usersTableBody) {
-                    usersTableBody.innerHTML = users.map(user => `
-                        <tr>
-                            <td>${user.username}</td>
-                            <td><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></td>
-                            <td>
-                               ${user.username !== 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})" title="Delete User"><i class="fas fa-trash"></i></button>` : ''}
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        }
+			// Get unique agent names
+			const agents = [...new Set(tokenData.map(item => {
+				const converted = convertFromDatabase(item);
+				return converted.agentName;
+			}).filter(Boolean))];
+			
+			// Update all agent dropdowns
+			const selectIds = ['filterAgent', 'reportAgent', 'profitAgent'];
+			selectIds.forEach(selectId => {
+				const select = document.getElementById(selectId);
+				if (select) {
+					const currentValue = select.value;
+					select.innerHTML = '<option value="">Select Agent</option>';
+					
+					// Only add "All Agents" option to filter dropdowns, not report dropdowns
+					if (selectId === 'filterAgent' || selectId === 'profitAgent') {
+						select.innerHTML += '<option value="All">All Agents</option>';
+					}
+					
+					agents.forEach(agent => {
+						select.innerHTML += `<option value="${agent}">${agent}</option>`;
+					});
+					
+					// Try to preserve the current selection
+					if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
+						select.value = currentValue;
+					}
+				}
+			});
+		}
 
         // Add new user
         async function addNewUser() {
@@ -1825,7 +1856,7 @@
         }
 
         // Generate and render agent report
-        function generateAgentReport() {
+		function generateAgentReport() {
 			const agent = document.getElementById('reportAgent').value;
 			const status = document.getElementById('reportAgentStatus').value;
 			const dateType = document.getElementById('reportAgentDateType').value;
@@ -1836,24 +1867,141 @@
 			
 			const filteredData = tokenData.filter(item => {
 				const converted = convertFromDatabase(item);
-				const dateField = dateType === 'completionDate' ? converted.completionDate : converted.date;
 				
-				return converted.agentName === agent &&
-					   (status === 'All' ? true : (status === 'Completed' ? converted.status === 'Completed' : converted.status !== 'Completed')) &&
-					   (fromDate ? dateField >= fromDate : true) &&
-					   (toDate ? dateField <= toDate : true);
+				// Check agent filter
+				if (converted.agentName !== agent) return false;
+				
+				// Check status filter
+				if (status !== 'All') {
+					if (status === 'Completed' && converted.status !== 'Completed') return false;
+					if (status === 'Incomplete' && converted.status === 'Completed') return false;
+				}
+				
+				// Check date filter
+				if (fromDate || toDate) {
+					let dateFieldValue;
+					if (dateType === 'completionDate') {
+						dateFieldValue = converted.completionDate;
+						// If filtering by completion date but no completion date exists, exclude
+						if (!dateFieldValue) return false;
+					} else {
+						dateFieldValue = converted.date;
+					}
+					
+					if (fromDate && dateFieldValue < fromDate) return false;
+					if (toDate && dateFieldValue > toDate) return false;
+				}
+				
+				return true;
 			});
+			
 			renderAgentReport(filteredData);
+			
+			// Show result count
+			if (filteredData.length === 0) {
+				showAlert('No records found matching your filters', 'warning');
+			} else {
+				showAlert(`Found ${filteredData.length} records matching your filters`, 'success');
+			}
+		}
+		
+		async function loadExecutivesList() { 
+			// Get unique executive names
+			const executives = [...new Set(tokenData.map(item => {
+				const converted = convertFromDatabase(item);
+				return converted.executiveName;
+			}).filter(Boolean))];
+			
+			// Update executive dropdowns
+			const selectIds = ['filterExecutive', 'reportExecutive'];
+			selectIds.forEach(selectId => {
+				const select = document.getElementById(selectId);
+				if (select) {
+					const currentValue = select.value;
+					select.innerHTML = '<option value="">Select Executive</option>';
+					
+					// Add "All Executives" option to filter dropdown
+					if (selectId === 'filterExecutive') {
+						select.innerHTML += '<option value="All">All Executives</option>';
+					}
+					
+					executives.forEach(executive => {
+						select.innerHTML += `<option value="${executive}">${executive}</option>`;
+					});
+					
+					// Try to preserve the current selection
+					if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
+						select.value = currentValue;
+					}
+				}
+			});
+		}
+
+		// Generate and render executive report
+		function generateExecutiveReport() {
+			const executive = document.getElementById('reportExecutive').value;
+			const status = document.getElementById('reportExecutiveStatus').value;
+			const dateType = document.getElementById('reportExecutiveDateType').value;
+			const fromDate = document.getElementById('reportExecutiveFromDate').value;
+			const toDate = document.getElementById('reportExecutiveToDate').value;
+			
+			if (!executive) return showAlert('Please select an executive', 'danger');
+			
+			const filteredData = tokenData.filter(item => {
+				const converted = convertFromDatabase(item);
+				
+				// Check executive filter
+				if (converted.executiveName !== executive) return false;
+				
+				// Check status filter
+				if (status !== 'All') {
+					if (status === 'Completed' && converted.status !== 'Completed') return false;
+					if (status === 'Incomplete' && converted.status === 'Completed') return false;
+				}
+				
+				// Check date filter
+				if (fromDate || toDate) {
+					let dateFieldValue;
+					if (dateType === 'completionDate') {
+						dateFieldValue = converted.completionDate;
+						// If filtering by completion date but no completion date exists, exclude
+						if (!dateFieldValue) return false;
+					} else {
+						dateFieldValue = converted.date;
+					}
+					
+					if (fromDate && dateFieldValue < fromDate) return false;
+					if (toDate && dateFieldValue > toDate) return false;
+				}
+				
+				return true;
+			});
+			
+			renderExecutiveReport(filteredData);
+			
+			// Show result count
+			if (filteredData.length === 0) {
+				showAlert('No records found matching your filters', 'warning');
+			} else {
+				showAlert(`Found ${filteredData.length} records matching your filters`, 'success');
+			}
 		}
 
         // Render agent report table
-				function renderAgentReport(data) {
+		function renderAgentReport(data) {
 			const tableBody = document.getElementById('agentReportBody');
+			
+			if (data.length === 0) {
+				tableBody.innerHTML = '<tr><td colspan="10" class="text-center">No records found</td></tr>';
+				return;
+			}
+			
 			tableBody.innerHTML = data.map(item => {
 				const converted = convertFromDatabase(item);
 				const chargesDisplay = converted.charges ? `₹${converted.charges}` : '-';
 				const amountDueDisplay = converted.amountDue ? `₹${converted.amountDue}` : '-';
 				const paymentDisplay = converted.paymentReceived ? `₹${converted.paymentReceived}` : 'No';
+				
 				return `
 					<tr>
 						<td><input type="checkbox" class="agent-checkbox" data-id="${converted.id}"></td>
@@ -1871,42 +2019,21 @@
 			}).join('');
 		}
 
-        // Toggle select all checkboxes
-        function toggleSelectAll(type) {
-            const isChecked = document.getElementById(`selectAll${type.charAt(0).toUpperCase() + type.slice(1)}`).checked;
-            document.querySelectorAll(`.${type}-checkbox`).forEach(checkbox => checkbox.checked = isChecked);
-        }
-
-        // Generate and render executive report
-        function generateExecutiveReport() {
-			const executive = document.getElementById('reportExecutive').value;
-			const status = document.getElementById('reportExecutiveStatus').value;
-			const dateType = document.getElementById('reportExecutiveDateType').value;
-			const fromDate = document.getElementById('reportExecutiveFromDate').value;
-			const toDate = document.getElementById('reportExecutiveToDate').value;
-			
-			if (!executive) return showAlert('Please select an executive', 'danger');
-			
-			const filteredData = tokenData.filter(item => {
-				const converted = convertFromDatabase(item);
-				const dateField = dateType === 'completionDate' ? converted.completionDate : converted.date;
-				
-				return converted.executiveName === executive &&
-					   (status === 'All' ? true : (status === 'Completed' ? converted.status === 'Completed' : converted.status !== 'Completed')) &&
-					   (fromDate ? dateField >= fromDate : true) &&
-					   (toDate ? dateField <= toDate : true);
-			});
-			renderExecutiveReport(filteredData);
-		}
-
-        // Render executive report table
-        function renderExecutiveReport(data) {
+		// Render executive report table
+		function renderExecutiveReport(data) {
 			const tableBody = document.getElementById('executiveReportBody');
+			
+			if (data.length === 0) {
+				tableBody.innerHTML = '<tr><td colspan="10" class="text-center">No records found</td></tr>';
+				return;
+			}
+			
 			tableBody.innerHTML = data.map(item => {
 				const converted = convertFromDatabase(item);
 				const executiveChargesDisplay = converted.chargesToExecutive ? `₹${converted.chargesToExecutive}` : '-';
 				const marginDisplay = converted.margin ? `₹${converted.margin}` : '-';
 				const paymentDisplay = converted.paymentReceived ? 'Yes' : 'No';
+				
 				return `
 					<tr>
 						<td><input type="checkbox" class="executive-checkbox" data-id="${converted.id}"></td>
