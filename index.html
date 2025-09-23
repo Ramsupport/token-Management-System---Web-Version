@@ -387,11 +387,6 @@
                         <i class="fas fa-cog me-2"></i>Settings
                     </button>
                 </li>
-				<li class="nav-item admin-only user-only" role="presentation" style="display: none;">
-					<button class="nav-link" id="manage-tab" data-bs-toggle="pill" data-bs-target="#manage-content" type="button">
-						<i class="fas fa-edit me-2"></i>Manage Names
-					</button>
-				</li>
             </ul>
 
             <div class="tab-content" id="mainTabContent">
@@ -1184,150 +1179,6 @@
             </div>
         </div>
     </div>
-	
-	<div class="tab-pane fade admin-only user-only" id="manage-content">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Manage Names & Locations</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <!-- Manage Agent Names -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0"><i class="fas fa-user-tie me-2"></i>Manage Agent Names</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Add New Agent</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="newAgentName" placeholder="Enter agent name">
-                                    <button class="btn btn-success" type="button" onclick="addNewAgent()">
-                                        <i class="fas fa-plus"></i> Add
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Existing Agents</label>
-                                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">
-                                    <div id="agentList"></div>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="renameSelectedAgent()">
-                                    <i class="fas fa-edit me-1"></i>Rename Selected
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="clearSelectedAgent()">
-                                    <i class="fas fa-trash me-1"></i>Clear Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Manage Executive Names -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="fas fa-user-shield me-2"></i>Manage Executive Names</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Add New Executive</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="newExecutiveName" placeholder="Enter executive name">
-                                    <button class="btn btn-success" type="button" onclick="addNewExecutive()">
-                                        <i class="fas fa-plus"></i> Add
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Existing Executives</label>
-                                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">
-                                    <div id="executiveList"></div>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="renameSelectedExecutive()">
-                                    <i class="fas fa-edit me-1"></i>Rename Selected
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="clearSelectedExecutive()">
-                                    <i class="fas fa-trash me-1"></i>Clear Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <!-- Manage City Names (India) -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0"><i class="fas fa-city me-2"></i>Manage City Names (India)</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Add New City</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="newIndianCity" placeholder="Enter city name">
-                                    <button class="btn btn-success" type="button" onclick="addNewIndianCity()">
-                                        <i class="fas fa-plus"></i> Add
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Existing Cities</label>
-                                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">
-                                    <div id="indianCityList"></div>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="renameSelectedIndianCity()">
-                                    <i class="fas fa-edit me-1"></i>Rename Selected
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="clearSelectedIndianCity()">
-                                    <i class="fas fa-trash me-1"></i>Clear Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Manage Country + City (International) -->
-                    <div class="card mb-3">
-                        <div class="card-header bg-warning text-dark">
-                            <h6 class="mb-0"><i class="fas fa-globe me-2"></i>Manage Country + City (International)</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Add New International Location</label>
-                                <div class="input-group mb-2">
-                                    <input type="text" class="form-control" id="newIntlCountry" placeholder="Country">
-                                    <input type="text" class="form-control" id="newIntlCity" placeholder="City">
-                                    <button class="btn btn-success" type="button" onclick="addNewInternationalLocation()">
-                                        <i class="fas fa-plus"></i> Add
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Existing International Locations</label>
-                                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 5px; padding: 10px;">
-                                    <div id="internationalLocationList"></div>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-warning btn-sm" onclick="renameSelectedInternationalLocation()">
-                                    <i class="fas fa-edit me-1"></i>Rename Selected
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="clearSelectedInternationalLocation()">
-                                    <i class="fas fa-trash me-1"></i>Clear Selected
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1374,21 +1225,20 @@
 
         // Initialize the application
         async function initApp() {
-			try {
-				await loadTokenData();
-				setupEventListeners();
-				updateUIForRole();
-				await loadAgentsList();
-				await loadExecutivesList();
-				await loadUsersList();
-				await loadManagedData(); // Add this line
-				updateSystemInfo();
-				checkConnectionStatus();
-			} catch (error) {
-				console.error('Error initializing app:', error);
-				showAlert('Error initializing application: ' + error.message, 'danger');
-			}
-		}
+            try {
+                await loadTokenData();
+                setupEventListeners();
+                updateUIForRole();
+                await loadAgentsList();
+                await loadExecutivesList();
+                await loadUsersList();
+                updateSystemInfo();
+                checkConnectionStatus();
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showAlert('Error initializing application: ' + error.message, 'danger');
+            }
+        }
 
         // Check database connection status
         async function checkConnectionStatus() {
@@ -1467,32 +1317,27 @@
         }
 
         // Update UI based on user role
-		function updateUIForRole() {
-			// Hide all role-specific elements first
-			document.querySelectorAll('.admin-only, .user-only, .agent-only, .executive-only').forEach(el => el.style.display = 'none');
-			document.querySelectorAll('.admin-only-column, .user-only-column, .agent-only-column, .executive-only-column').forEach(el => el.style.display = 'none');
-			document.querySelectorAll('.admin-only-field, .user-only-field').forEach(el => el.style.display = 'none');
+        function updateUIForRole() {
+            // Hide all role-specific elements first
+            document.querySelectorAll('.admin-only, .user-only, .agent-only, .executive-only').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.admin-only-column, .user-only-column, .agent-only-column, .executive-only-column').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.admin-only-field, .user-only-field').forEach(el => el.style.display = 'none');
 
-			// Show elements based on current role
-			const show = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = '');
+            // Show elements based on current role
+            const show = (selector) => document.querySelectorAll(selector).forEach(el => el.style.display = '');
 
-			if (currentRole === 'admin') {
-				show('.admin-only, .admin-only-column, .admin-only-field');
-			} else if (currentRole === 'user') {
-				show('.user-only, .user-only-column, .user-only-field');
-			} else if (currentRole === 'agent') {
-				show('.agent-only, .agent-only-column');
-			} else if (currentRole === 'executive') {
-				show('.executive-only, .executive-only-column');
-			}
-			
-			// Add this line to show the manage tab for admin and user roles
-			if (currentRole === 'admin' || currentRole === 'user') {
-				document.querySelectorAll('.admin-only.user-only').forEach(el => el.style.display = '');
-			}
-			
-			renderDataTable();
-		}
+            if (currentRole === 'admin') {
+                show('.admin-only, .admin-only-column, .admin-only-field');
+            } else if (currentRole === 'user') {
+                show('.user-only, .user-only-column, .user-only-field');
+            } else if (currentRole === 'agent') {
+                show('.agent-only, .agent-only-column');
+            } else if (currentRole === 'executive') {
+                show('.executive-only, .executive-only-column');
+            }
+            
+            renderDataTable();
+        }
 
         // Convert database field names to frontend format
         function convertFromDatabase(dbItem) {
@@ -1854,442 +1699,6 @@
                 console.error('Error loading users:', error);
             }
         }
-		
-		// Global variables for name management
-		let managedData = {
-			agents: [],
-			executives: [],
-			indianCities: [],
-			internationalLocations: []
-		};
-
-		// Load managed data
-		async function loadManagedData() {
-			try {
-				// Try to load from localStorage first
-				const savedData = localStorage.getItem('managedNames');
-				if (savedData) {
-					managedData = JSON.parse(savedData);
-				}
-				
-				// Also extract from existing token data
-				await extractNamesFromTokens();
-				renderManagedLists();
-			} catch (error) {
-				console.error('Error loading managed data:', error);
-			}
-		}
-
-		// Extract names from existing tokens
-		async function extractNamesFromTokens() {
-			const agents = new Set();
-			const executives = new Set();
-			const indianCities = new Set();
-			const internationalLocations = new Set();
-
-			tokenData.forEach(item => {
-				const converted = convertFromDatabase(item);
-				
-				if (converted.agentName) agents.add(converted.agentName);
-				if (converted.executiveName) executives.add(converted.executiveName);
-				
-				if (converted.location === 'India' && converted.subLocation) {
-					indianCities.add(converted.subLocation);
-				} else if (converted.location === 'International' && converted.subLocation) {
-					internationalLocations.add(converted.subLocation);
-				}
-			});
-
-			// Merge with existing data
-			managedData.agents = [...new Set([...managedData.agents, ...agents])].sort();
-			managedData.executives = [...new Set([...managedData.executives, ...executives])].sort();
-			managedData.indianCities = [...new Set([...managedData.indianCities, ...indianCities])].sort();
-			managedData.internationalLocations = [...new Set([...managedData.internationalLocations, ...internationalLocations])].sort();
-			
-			saveManagedData();
-		}
-
-		// Save managed data to localStorage
-		function saveManagedData() {
-			localStorage.setItem('managedNames', JSON.stringify(managedData));
-		}
-
-		// Render all managed lists
-		function renderManagedLists() {
-			renderAgentList();
-			renderExecutiveList();
-			renderIndianCityList();
-			renderInternationalLocationList();
-		}
-
-		// Render agent list
-		function renderAgentList() {
-			const container = document.getElementById('agentList');
-			container.innerHTML = managedData.agents.map(agent => `
-				<div class="form-check">
-					<input class="form-check-input agent-check" type="radio" name="agentRadio" value="${agent}" id="agent_${agent.replace(/\s+/g, '_')}">
-					<label class="form-check-label" for="agent_${agent.replace(/\s+/g, '_')}">${agent}</label>
-				</div>
-			`).join('');
-		}
-
-		// Render executive list
-		function renderExecutiveList() {
-			const container = document.getElementById('executiveList');
-			container.innerHTML = managedData.executives.map(executive => `
-				<div class="form-check">
-					<input class="form-check-input executive-check" type="radio" name="executiveRadio" value="${executive}" id="executive_${executive.replace(/\s+/g, '_')}">
-					<label class="form-check-label" for="executive_${executive.replace(/\s+/g, '_')}">${executive}</label>
-				</div>
-			`).join('');
-		}
-
-		// Render Indian city list
-		function renderIndianCityList() {
-			const container = document.getElementById('indianCityList');
-			container.innerHTML = managedData.indianCities.map(city => `
-				<div class="form-check">
-					<input class="form-check-input city-check" type="radio" name="cityRadio" value="${city}" id="city_${city.replace(/\s+/g, '_')}">
-					<label class="form-check-label" for="city_${city.replace(/\s+/g, '_')}">${city}</label>
-				</div>
-			`).join('');
-		}
-
-		// Render international location list
-		function renderInternationalLocationList() {
-			const container = document.getElementById('internationalLocationList');
-			container.innerHTML = managedData.internationalLocations.map(location => `
-				<div class="form-check">
-					<input class="form-check-input intl-check" type="radio" name="intlRadio" value="${location}" id="intl_${location.replace(/\s+/g, '_')}">
-					<label class="form-check-label" for="intl_${location.replace(/\s+/g, '_')}">${location}</label>
-				</div>
-			`).join('');
-		}
-
-		// Add new agent
-		function addNewAgent() {
-			const newAgent = document.getElementById('newAgentName').value.trim();
-			if (!newAgent) return showAlert('Please enter an agent name', 'warning');
-			
-			if (!managedData.agents.includes(newAgent)) {
-				managedData.agents.push(newAgent);
-				managedData.agents.sort();
-				saveManagedData();
-				renderAgentList();
-				document.getElementById('newAgentName').value = '';
-				showAlert('Agent added successfully', 'success');
-				
-				// Refresh agent dropdowns
-				loadAgentsList();
-			} else {
-				showAlert('Agent already exists', 'warning');
-			}
-		}
-
-		// Add new executive
-		function addNewExecutive() {
-			const newExecutive = document.getElementById('newExecutiveName').value.trim();
-			if (!newExecutive) return showAlert('Please enter an executive name', 'warning');
-			
-			if (!managedData.executives.includes(newExecutive)) {
-				managedData.executives.push(newExecutive);
-				managedData.executives.sort();
-				saveManagedData();
-				renderExecutiveList();
-				document.getElementById('newExecutiveName').value = '';
-				showAlert('Executive added successfully', 'success');
-				
-				// Refresh executive dropdowns
-				loadExecutivesList();
-			} else {
-				showAlert('Executive already exists', 'warning');
-			}
-		}
-
-		// Add new Indian city
-		function addNewIndianCity() {
-			const newCity = document.getElementById('newIndianCity').value.trim();
-			if (!newCity) return showAlert('Please enter a city name', 'warning');
-			
-			if (!managedData.indianCities.includes(newCity)) {
-				managedData.indianCities.push(newCity);
-				managedData.indianCities.sort();
-				saveManagedData();
-				renderIndianCityList();
-				document.getElementById('newIndianCity').value = '';
-				showAlert('City added successfully', 'success');
-			} else {
-				showAlert('City already exists', 'warning');
-			}
-		}
-
-		// Add new international location
-		function addNewInternationalLocation() {
-			const country = document.getElementById('newIntlCountry').value.trim();
-			const city = document.getElementById('newIntlCity').value.trim();
-			
-			if (!country || !city) return showAlert('Please enter both country and city', 'warning');
-			
-			const location = `${city}, ${country}`;
-			if (!managedData.internationalLocations.includes(location)) {
-				managedData.internationalLocations.push(location);
-				managedData.internationalLocations.sort();
-				saveManagedData();
-				renderInternationalLocationList();
-				document.getElementById('newIntlCountry').value = '';
-				document.getElementById('newIntlCity').value = '';
-				showAlert('International location added successfully', 'success');
-			} else {
-				showAlert('Location already exists', 'warning');
-			}
-		}
-
-		// Rename selected agent
-		function renameSelectedAgent() {
-			const selected = document.querySelector('input[name="agentRadio"]:checked');
-			if (!selected) return showAlert('Please select an agent to rename', 'warning');
-			
-			const newName = prompt('Enter new name for agent:', selected.value);
-			if (newName && newName.trim()) {
-				const oldName = selected.value;
-				const newNameTrimmed = newName.trim();
-				
-				// Update in managed data
-				const index = managedData.agents.indexOf(oldName);
-				if (index !== -1) {
-					managedData.agents[index] = newNameTrimmed;
-					managedData.agents.sort();
-					
-					// Update in all tokens
-					updateAgentNameInTokens(oldName, newNameTrimmed);
-					
-					saveManagedData();
-					renderAgentList();
-					loadAgentsList();
-					showAlert('Agent renamed successfully', 'success');
-				}
-			}
-		}
-
-		// Rename selected executive
-		function renameSelectedExecutive() {
-			const selected = document.querySelector('input[name="executiveRadio"]:checked');
-			if (!selected) return showAlert('Please select an executive to rename', 'warning');
-			
-			const newName = prompt('Enter new name for executive:', selected.value);
-			if (newName && newName.trim()) {
-				const oldName = selected.value;
-				const newNameTrimmed = newName.trim();
-				
-				// Update in managed data
-				const index = managedData.executives.indexOf(oldName);
-				if (index !== -1) {
-					managedData.executives[index] = newNameTrimmed;
-					managedData.executives.sort();
-					
-					// Update in all tokens
-					updateExecutiveNameInTokens(oldName, newNameTrimmed);
-					
-					saveManagedData();
-					renderExecutiveList();
-					loadExecutivesList();
-					showAlert('Executive renamed successfully', 'success');
-				}
-			}
-		}
-
-		// Rename selected Indian city
-		function renameSelectedIndianCity() {
-			const selected = document.querySelector('input[name="cityRadio"]:checked');
-			if (!selected) return showAlert('Please select a city to rename', 'warning');
-			
-			const newName = prompt('Enter new name for city:', selected.value);
-			if (newName && newName.trim()) {
-				const oldName = selected.value;
-				const newNameTrimmed = newName.trim();
-				
-				// Update in managed data
-				const index = managedData.indianCities.indexOf(oldName);
-				if (index !== -1) {
-					managedData.indianCities[index] = newNameTrimmed;
-					managedData.indianCities.sort();
-					
-					// Update in all tokens
-					updateLocationInTokens(oldName, newNameTrimmed, 'India');
-					
-					saveManagedData();
-					renderIndianCityList();
-					showAlert('City renamed successfully', 'success');
-				}
-			}
-		}
-
-		// Rename selected international location
-		function renameSelectedInternationalLocation() {
-			const selected = document.querySelector('input[name="intlRadio"]:checked');
-			if (!selected) return showAlert('Please select a location to rename', 'warning');
-			
-			const newName = prompt('Enter new name for location:', selected.value);
-			if (newName && newName.trim()) {
-				const oldName = selected.value;
-				const newNameTrimmed = newName.trim();
-				
-				// Update in managed data
-				const index = managedData.internationalLocations.indexOf(oldName);
-				if (index !== -1) {
-					managedData.internationalLocations[index] = newNameTrimmed;
-					managedData.internationalLocations.sort();
-					
-					// Update in all tokens
-					updateLocationInTokens(oldName, newNameTrimmed, 'International');
-					
-					saveManagedData();
-					renderInternationalLocationList();
-					showAlert('International location renamed successfully', 'success');
-				}
-			}
-		}
-
-		// Update agent name in all tokens
-		async function updateAgentNameInTokens(oldName, newName) {
-			try {
-				const tokensToUpdate = tokenData.filter(item => {
-					const converted = convertFromDatabase(item);
-					return converted.agentName === oldName;
-				});
-				
-				for (const token of tokensToUpdate) {
-					const converted = convertFromDatabase(token);
-					converted.agentName = newName;
-					const dbData = convertToDatabase(converted);
-					
-					await apiRequest(`/tokens/${token.id}`, {
-						method: 'PUT',
-						body: JSON.stringify(dbData)
-					});
-				}
-				
-				if (tokensToUpdate.length > 0) {
-					await loadTokenData();
-					showAlert(`Updated ${tokensToUpdate.length} tokens with new agent name`, 'info');
-				}
-			} catch (error) {
-				console.error('Error updating agent name in tokens:', error);
-				showAlert('Error updating tokens: ' + error.message, 'danger');
-			}
-		}
-
-		// Update executive name in all tokens
-		async function updateExecutiveNameInTokens(oldName, newName) {
-			try {
-				const tokensToUpdate = tokenData.filter(item => {
-					const converted = convertFromDatabase(item);
-					return converted.executiveName === oldName;
-				});
-				
-				for (const token of tokensToUpdate) {
-					const converted = convertFromDatabase(token);
-					converted.executiveName = newName;
-					const dbData = convertToDatabase(converted);
-					
-					await apiRequest(`/tokens/${token.id}`, {
-						method: 'PUT',
-						body: JSON.stringify(dbData)
-					});
-				}
-				
-				if (tokensToUpdate.length > 0) {
-					await loadTokenData();
-					showAlert(`Updated ${tokensToUpdate.length} tokens with new executive name`, 'info');
-				}
-			} catch (error) {
-				console.error('Error updating executive name in tokens:', error);
-				showAlert('Error updating tokens: ' + error.message, 'danger');
-			}
-		}
-
-		// Update location in all tokens
-		async function updateLocationInTokens(oldName, newName, locationType) {
-			try {
-				const tokensToUpdate = tokenData.filter(item => {
-					const converted = convertFromDatabase(item);
-					return converted.location === locationType && converted.subLocation === oldName;
-				});
-				
-				for (const token of tokensToUpdate) {
-					const converted = convertFromDatabase(token);
-					converted.subLocation = newName;
-					const dbData = convertToDatabase(converted);
-					
-					await apiRequest(`/tokens/${token.id}`, {
-						method: 'PUT',
-						body: JSON.stringify(dbData)
-					});
-				}
-				
-				if (tokensToUpdate.length > 0) {
-					await loadTokenData();
-					showAlert(`Updated ${tokensToUpdate.length} tokens with new location`, 'info');
-				}
-			} catch (error) {
-				console.error('Error updating location in tokens:', error);
-				showAlert('Error updating tokens: ' + error.message, 'danger');
-			}
-		}
-
-		// Clear selected agent
-		function clearSelectedAgent() {
-			const selected = document.querySelector('input[name="agentRadio"]:checked');
-			if (!selected) return showAlert('Please select an agent to clear', 'warning');
-			
-			if (confirm(`Are you sure you want to remove "${selected.value}" from the agent list?`)) {
-				managedData.agents = managedData.agents.filter(agent => agent !== selected.value);
-				saveManagedData();
-				renderAgentList();
-				loadAgentsList();
-				showAlert('Agent removed from list', 'success');
-			}
-		}
-
-		// Clear selected executive
-		function clearSelectedExecutive() {
-			const selected = document.querySelector('input[name="executiveRadio"]:checked');
-			if (!selected) return showAlert('Please select an executive to clear', 'warning');
-			
-			if (confirm(`Are you sure you want to remove "${selected.value}" from the executive list?`)) {
-				managedData.executives = managedData.executives.filter(executive => executive !== selected.value);
-				saveManagedData();
-				renderExecutiveList();
-				loadExecutivesList();
-				showAlert('Executive removed from list', 'success');
-			}
-		}
-
-		// Clear selected Indian city
-		function clearSelectedIndianCity() {
-			const selected = document.querySelector('input[name="cityRadio"]:checked');
-			if (!selected) return showAlert('Please select a city to clear', 'warning');
-			
-			if (confirm(`Are you sure you want to remove "${selected.value}" from the city list?`)) {
-				managedData.indianCities = managedData.indianCities.filter(city => city !== selected.value);
-				saveManagedData();
-				renderIndianCityList();
-				showAlert('City removed from list', 'success');
-			}
-		}
-
-		// Clear selected international location
-		function clearSelectedInternationalLocation() {
-			const selected = document.querySelector('input[name="intlRadio"]:checked');
-			if (!selected) return showAlert('Please select a location to clear', 'warning');
-			
-			if (confirm(`Are you sure you want to remove "${selected.value}" from the international locations list?`)) {
-				managedData.internationalLocations = managedData.internationalLocations.filter(location => location !== selected.value);
-				saveManagedData();
-				renderInternationalLocationList();
-				showAlert('International location removed from list', 'success');
-			}
-		}
 
         // Add new user
         async function addNewUser() {
@@ -2735,31 +2144,40 @@
         
         // Show alert messages
         function showAlert(message, type, elementId = 'alertContainer') {
-			let container = document.getElementById(elementId);
-			if (!container) {
-				container = document.createElement('div');
-				container.id = elementId;
-				container.className = 'position-fixed top-0 end-0 p-3';
-				container.style.zIndex = '1050';
-				document.body.appendChild(container);
-			} else {
-				// Clear existing alerts before adding a new one
-				container.innerHTML = '';
-			}
-			
-			const alert = document.createElement('div');
-			alert.className = `alert alert-${type} alert-dismissible fade show`;
-			alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-			container.appendChild(alert);
-			
-			setTimeout(() => {
-				try {
-					bootstrap.Alert.getOrCreateInstance(alert)?.close();
-				} catch (e) {
-					alert.remove();
-				}
-			}, 5000);
-		}
+            let container = document.getElementById(elementId);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = elementId;
+                container.className = 'position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '1050';
+                document.body.appendChild(container);
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                try {
+                    bootstrap.Alert.getOrCreateInstance(alert)?.close();
+                } catch (e) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        function showAbout() { 
+            new bootstrap.Modal(document.getElementById('aboutModal')).show(); 
+        }
+        
+        async function refreshData() { 
+            await loadTokenData(); 
+            await loadAgentsList(); 
+            await loadExecutivesList(); 
+            await checkConnectionStatus();
+            showAlert('Data refreshed', 'info'); 
+        }
 
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', function() {
