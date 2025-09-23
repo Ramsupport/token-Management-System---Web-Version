@@ -2400,61 +2400,108 @@
 			}).join('');
 		}
 
-        // Generate and render profit report
-        function generateProfitReport() {
-            const agent = document.getElementById('profitAgent').value;
-            const location = document.getElementById('profitLocation').value;
-            const fromDate = document.getElementById('profitFromDate').value;
-            const toDate = document.getElementById('profitToDate').value;
-            
-            let filteredData = tokenData.filter(item => {
-                const converted = convertFromDatabase(item);
-                return (agent === 'All' ? true : converted.agentName === agent) &&
-                       (location === 'All' ? true : converted.location === location) &&
-                       (fromDate ? converted.date >= fromDate : true) &&
-                       (toDate ? converted.date <= toDate : true);
-            });
-            renderProfitReport(filteredData);
-        }
+        // ✅ CORRECTED generateProfitReport function
+		function generateProfitReport() {
+			const agent = document.getElementById('profitAgent').value;
+			const location = document.getElementById('profitLocation').value;
+			const fromDate = document.getElementById('profitFromDate').value;
+			const toDate = document.getElementById('profitToDate').value;
+			
+			let filteredData = tokenData.filter(item => {
+				const converted = convertFromDatabase(item);
+				
+				// Convert dates for proper comparison
+				const itemDate = new Date(converted.date);
+				let includeItem = true;
+				
+				// Apply filters
+				if (agent !== 'All' && converted.agentName !== agent) includeItem = false;
+				if (location !== 'All' && converted.location !== location) includeItem = false;
+				
+				if (fromDate) {
+					const fromDateObj = new Date(fromDate);
+					fromDateObj.setHours(0, 0, 0, 0);
+					if (itemDate < fromDateObj) includeItem = false;
+				}
+				
+				if (toDate) {
+					const toDateObj = new Date(toDate);
+					toDateObj.setHours(23, 59, 59, 999);
+					if (itemDate > toDateObj) includeItem = false;
+				}
+				
+				return includeItem;
+			});
+			
+			renderProfitReport(filteredData);
+		}
 
-        // Render profit report
-        function renderProfitReport(data) {
-            const tableBody = document.getElementById('profitTableBody');
-            let totalRevenue = 0, totalExpenses = 0, completedCount = 0, totalMargin = 0;
+		// ✅ CORRECTED renderProfitReport function
+		function renderProfitReport(data) {
+			const tableBody = document.getElementById('profitTableBody');
+			
+			// Reset summary values
+			let totalRevenue = 0;
+			let totalExpenses = 0;
+			let totalMargin = 0;
+			let completedCount = 0;
 
-            tableBody.innerHTML = data.map(item => {
-                const converted = convertFromDatabase(item);
-                totalRevenue += converted.paymentReceived || 0;
-                totalExpenses += converted.chargesToExecutive || 0;
-                totalMargin += converted.margin || 0;
-                if (converted.status === 'Completed') completedCount++;
-                
-                return `
-                    <tr>
-                        <td>${formatDate(converted.date)}</td>
-                        <td>${converted.agentName || '-'}</td>
-                        <td>${converted.clientName}</td>
-                        <td>${converted.location}</td>
-                        <td>${converted.charges ? '₹' + converted.charges : '-'}</td>
-                        <td>${converted.chargesToExecutive ? '₹' + converted.chargesToExecutive : '-'}</td>
-                        <td>${converted.margin ? '₹' + converted.margin : '-'}</td>
-                        <td><span class="badge ${converted.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${converted.status}</span></td>
-                    </tr>
-                `;
-            }).join('');
-            
-            const netProfit = totalRevenue - totalExpenses;
-            const averageMargin = data.length > 0 ? totalMargin / data.length : 0;
-            const completionRate = data.length > 0 ? (completedCount / data.length) * 100 : 0;
-            
-            document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
-            document.getElementById('totalExpenses').textContent = '₹' + totalExpenses.toFixed(2);
-            document.getElementById('netProfit').textContent = '₹' + netProfit.toFixed(2);
-            document.getElementById('totalTransactions').textContent = data.length;
-            document.getElementById('completedTransactions').textContent = completedCount;
-            document.getElementById('averageMargin').textContent = '₹' + averageMargin.toFixed(2);
-            document.getElementById('completionRate').textContent = completionRate.toFixed(1) + '%';
-        }
+			tableBody.innerHTML = data.map(item => {
+				const converted = convertFromDatabase(item);
+				
+				// ✅ CORRECT CALCULATIONS:
+				const charges = parseFloat(converted.charges) || 0;
+				const executiveCharges = parseFloat(converted.chargesToExecutive) || 0;
+				const margin = parseFloat(converted.margin) || 0;
+				const paymentReceived = parseFloat(converted.paymentReceived) || 0;
+				
+				// Accumulate totals
+				totalRevenue += paymentReceived; // Revenue is what you actually received
+				totalExpenses += executiveCharges; // Expenses are what you paid to executives
+				totalMargin += margin; // Margin is charges - executive charges
+				if (converted.status === 'Completed') completedCount++;
+				
+				// Get currency symbol from settings
+				const currencySymbol = document.getElementById('currencySymbol')?.value || '₹';
+				
+				return `
+					<tr>
+						<td>${formatDate(converted.date)}</td>
+						<td>${converted.agentName || '-'}</td>
+						<td>${converted.clientName}</td>
+						<td>${converted.location}</td>
+						<td>${charges > 0 ? currencySymbol + charges.toFixed(2) : '-'}</td>
+						<td>${executiveCharges > 0 ? currencySymbol + executiveCharges.toFixed(2) : '-'}</td>
+						<td>${margin > 0 ? currencySymbol + margin.toFixed(2) : '-'}</td>
+						<td><span class="badge ${converted.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${converted.status}</span></td>
+					</tr>
+				`;
+			}).join('');
+			
+			// ✅ CORRECT SUMMARY CALCULATIONS:
+			const netProfit = totalMargin; // Net profit should be the total margin
+			const averageMargin = data.length > 0 ? totalMargin / data.length : 0;
+			const completionRate = data.length > 0 ? (completedCount / data.length) * 100 : 0;
+			
+			// Get currency symbol
+			const currencySymbol = document.getElementById('currencySymbol')?.value || '₹';
+			
+			// Update summary displays
+			document.getElementById('totalRevenue').textContent = currencySymbol + totalRevenue.toFixed(2);
+			document.getElementById('totalExpenses').textContent = currencySymbol + totalExpenses.toFixed(2);
+			document.getElementById('netProfit').textContent = currencySymbol + netProfit.toFixed(2);
+			document.getElementById('totalTransactions').textContent = data.length;
+			document.getElementById('completedTransactions').textContent = completedCount;
+			document.getElementById('averageMargin').textContent = currencySymbol + averageMargin.toFixed(2);
+			document.getElementById('completionRate').textContent = completionRate.toFixed(1) + '%';
+			
+			// Show result count
+			if (data.length === 0) {
+				showAlert('No records found matching your filters', 'warning');
+			} else {
+				showAlert(`Found ${data.length} records for profit analysis`, 'success');
+			}
+		}
 
         // Mark selected items as completed
         async function markAllCompleted(type) {
@@ -2561,85 +2608,160 @@
             showAlert('Data exported as CSV', 'success');
         }
         
-        function exportAgentReport() {
-            const agent = document.getElementById('reportAgent').value;
-            if (!agent) return showAlert('Please generate an agent report first', 'warning');
             
-            const filteredData = tokenData.filter(item => {
-                const converted = convertFromDatabase(item);
-                return converted.agentName === agent;
-            });
-            
-            if (filteredData.length === 0) return showAlert('No data to export for this agent.', 'warning');
-
-            const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Charges'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredData.map(item => {
-                    const converted = convertFromDatabase(item);
-                    return [
-                        `"${converted.date || ''}"`,
-                        `"${converted.completionDate || ''}"`,
-                        `"${converted.location || ''}"`,
-                        `"${converted.token || ''}"`,
-                        converted.charges || 0
-                    ].join(',');
-                })
-            ].join('\n');
-            
-            downloadCSV(csvContent, `agent-report-${agent}.csv`);
-            showAlert('Agent report exported', 'success');
-        }
-
-        function exportExecutiveReport() {
-            const executive = document.getElementById('reportExecutive').value;
-            if (!executive) return showAlert('Please generate an executive report first', 'warning');
-            
-            const filteredData = tokenData.filter(item => {
-                const converted = convertFromDatabase(item);
-                return converted.executiveName === executive;
-            });
-            
-            if (filteredData.length === 0) return showAlert('No data to export for this executive.', 'warning');
-
-            const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Executive Charges'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredData.map(item => {
-                    const converted = convertFromDatabase(item);
-                    return [
-                        `"${converted.date || ''}"`,
-                        `"${converted.completionDate || ''}"`,
-                        `"${converted.location || ''}"`,
-                        `"${converted.token || ''}"`,
-                        converted.chargesToExecutive || 0
-                    ].join(',');
-                })
-            ].join('\n');
-            
-            downloadCSV(csvContent, `executive-report-${executive}.csv`);
-            showAlert('Executive report exported', 'success');
-        }
         
-        function exportProfitReport() {
-            const tableBody = document.getElementById('profitTableBody');
-            if(tableBody.rows.length === 0) return showAlert('Please generate a profit report first.', 'warning');
+        // ✅ FIXED exportProfitReport function - removes currency symbols for Excel
+		function exportProfitReport() {
+			const tableBody = document.getElementById('profitTableBody');
+			if(tableBody.rows.length === 0) return showAlert('Please generate a profit report first.', 'warning');
 
-            const headers = ['Date', 'Agent', 'Client', 'Location', 'Charges', 'Executive Charges', 'Margin', 'Status'];
-            const rows = Array.from(tableBody.rows).map(row => Array.from(row.cells).map(cell => `"${cell.textContent}"`).join(','));
-            const csv = [headers.join(','), ...rows].join('\n');
-            downloadCSV(csv, 'profit-report.csv');
-        }
+			const headers = ['Date', 'Agent', 'Client', 'Location', 'Charges', 'Executive Charges', 'Margin', 'Status'];
+			
+			const rows = Array.from(tableBody.rows).map(row => {
+				const cells = Array.from(row.cells);
+				return [
+					`"${cells[0].textContent}"`, // Date
+					`"${cells[1].textContent}"`, // Agent
+					`"${cells[2].textContent}"`, // Client
+					`"${cells[3].textContent}"`, // Location
+					cells[4].textContent.replace(/[^0-9.]/g, '') || '0', // Charges (numbers only)
+					cells[5].textContent.replace(/[^0-9.]/g, '') || '0', // Executive Charges (numbers only)
+					cells[6].textContent.replace(/[^0-9.]/g, '') || '0', // Margin (numbers only)
+					`"${cells[7].textContent}"`  // Status
+				].join(',');
+			});
+			
+			const csv = [headers.join(','), ...rows].join('\n');
+			downloadCSV(csv, 'profit-report.csv');
+			showAlert('Profit report exported (Excel-friendly format)', 'success');
+		}
 
-        function exportFilteredData() {
-            const tableBody = document.getElementById('filteredTableBody');
-            if(tableBody.rows.length === 0) return showAlert('Please apply filters to get data first.', 'warning');
-            
-            const headers = ['ID', 'Date', 'Location', 'City/Country', 'Token', 'Client Name', 'Status', 'Charges', 'Amount Due', 'Agent', 'Executive'];
-            const rows = Array.from(tableBody.rows).map(row => Array.from(row.cells, cell => `"${cell.textContent}"`).join(','));
-            const csv = [headers.join(','), ...rows].join('\n');
-            downloadCSV(csv, 'filtered-data.csv');
-        }
+		// ✅ FIXED exportData function - removes currency symbols
+		function exportData() {
+			if (tokenData.length === 0) return showAlert('No data to export', 'warning');
+			
+			const convertedData = tokenData.map(item => convertFromDatabase(item));
+			const headers = ['ID', 'Date', 'Location', 'Token', 'Client Name', 'Status', 'Charges', 'Amount Due', 'Agent', 'Executive'];
+			
+			const csv = [
+				headers.join(','),
+				...convertedData.map(row => [
+					row.id,
+					`"${formatDate(row.date)}"`,
+					`"${row.location}"`,
+					`"${row.token}"`,
+					`"${row.clientName}"`,
+					`"${row.status}"`,
+					(row.charges || 0).toString(), // Numbers without currency symbols
+					(row.amountDue || 0).toString(), // Numbers without currency symbols
+					`"${row.agentName || ''}"`,
+					`"${row.executiveName || ''}"`
+				].join(','))
+			].join('\n');
+			
+			downloadCSV(csv, 'token-data.csv');
+			showAlert('Data exported as Excel-friendly CSV', 'success');
+		}
+
+		// ✅ FIXED exportFilteredData function
+		function exportFilteredData() {
+			const tableBody = document.getElementById('filteredTableBody');
+			if(tableBody.rows.length === 0) return showAlert('Please apply filters to get data first.', 'warning');
+			
+			const headers = ['ID', 'Date Given', 'Completion Date', 'Location', 'City/Country', 'Token', 'Client Name', 'Status', 'Charges', 'Amount Due', 'Agent', 'Executive'];
+			
+			const rows = Array.from(tableBody.rows).map(row => {
+				const cells = Array.from(row.cells);
+				return [
+					cells[0].textContent, // ID
+					`"${cells[1].textContent}"`, // Date Given
+					`"${cells[2].textContent}"`, // Completion Date
+					`"${cells[3].textContent}"`, // Location
+					`"${cells[4].textContent}"`, // City/Country
+					`"${cells[5].textContent}"`, // Token
+					`"${cells[6].textContent}"`, // Client Name
+					`"${cells[7].textContent}"`, // Status
+					cells[8].textContent.replace(/[^0-9.]/g, '') || '0', // Charges (numbers only)
+					cells[9].textContent.replace(/[^0-9.]/g, '') || '0', // Amount Due (numbers only)
+					`"${cells[10].textContent}"`, // Agent
+					`"${cells[11].textContent}"`  // Executive
+				].join(',');
+			});
+			
+			const csv = [headers.join(','), ...rows].join('\n');
+			downloadCSV(csv, 'filtered-data.csv');
+			showAlert('Filtered data exported (Excel-friendly format)', 'success');
+		}
+
+		// ✅ FIXED exportAgentReport function
+		function exportAgentReport() {
+			const agent = document.getElementById('reportAgent').value;
+			if (!agent) return showAlert('Please generate an agent report first', 'warning');
+			
+			const filteredData = tokenData.filter(item => {
+				const converted = convertFromDatabase(item);
+				return converted.agentName === agent;
+			});
+			
+			if (filteredData.length === 0) return showAlert('No data to export for this agent.', 'warning');
+
+			const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Client Name', 'Charges', 'Amount Due', 'Status', 'Payment Received'];
+			const csvContent = [
+				headers.join(','),
+				...filteredData.map(item => {
+					const converted = convertFromDatabase(item);
+					return [
+						`"${formatDate(converted.date)}"`,
+						`"${formatDate(converted.completionDate)}"`,
+						`"${converted.location}"`,
+						`"${converted.token}"`,
+						`"${converted.clientName}"`,
+						(converted.charges || 0).toString(), // Numbers only
+						(converted.amountDue || 0).toString(), // Numbers only
+						`"${converted.status}"`,
+						(converted.paymentReceived || 0).toString() // Numbers only
+					].join(',');
+				})
+			].join('\n');
+			
+			downloadCSV(csvContent, `agent-report-${agent}.csv`);
+			showAlert('Agent report exported (Excel-friendly format)', 'success');
+		}
+
+		// ✅ FIXED exportExecutiveReport function
+		function exportExecutiveReport() {
+			const executive = document.getElementById('reportExecutive').value;
+			if (!executive) return showAlert('Please generate an executive report first', 'warning');
+			
+			const filteredData = tokenData.filter(item => {
+				const converted = convertFromDatabase(item);
+				return converted.executiveName === executive;
+			});
+			
+			if (filteredData.length === 0) return showAlert('No data to export for this executive.', 'warning');
+
+			const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Client Name', 'Executive Charges', 'Margin', 'Status', 'Payment Applied'];
+			const csvContent = [
+				headers.join(','),
+				...filteredData.map(item => {
+					const converted = convertFromDatabase(item);
+					return [
+						`"${formatDate(converted.date)}"`,
+						`"${formatDate(converted.completionDate)}"`,
+						`"${converted.location}"`,
+						`"${converted.token}"`,
+						`"${converted.clientName}"`,
+						(converted.chargesToExecutive || 0).toString(), // Numbers only
+						(converted.margin || 0).toString(), // Numbers only
+						`"${converted.status}"`,
+						converted.paymentReceived ? 'Yes' : 'No'
+					].join(',');
+				})
+			].join('\n');
+			
+			downloadCSV(csvContent, `executive-report-${executive}.csv`);
+			showAlert('Executive report exported (Excel-friendly format)', 'success');
+		}
 
         // Enhanced Backup Creation
 		async function createBackup() {
