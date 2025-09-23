@@ -39,6 +39,14 @@ async function initializeDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`);
 
+    // Remove unique constraint if it exists (this allows duplicate token numbers)
+    try {
+      await pool.query('ALTER TABLE tokens DROP CONSTRAINT IF EXISTS tokens_token_key');
+      console.log('✅ Unique constraint removed from tokens table');
+    } catch (error) {
+      console.log('ℹ️ Unique constraint already removed or does not exist');
+    }
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE, password VARCHAR(255),
