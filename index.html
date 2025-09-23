@@ -367,7 +367,7 @@
                         <i class="fas fa-filter me-2"></i>Token Filter
                     </button>
                 </li>
-                <li class="nav-item admin-only user-only agent-only" role="presentation" style="display: none;">
+                <li class="nav-item admin-only agent-only" role="presentation" style="display: none;">
                     <button class="nav-link" id="agent-tab" data-bs-toggle="pill" data-bs-target="#agent-content" type="button">
                         <i class="fas fa-user-tie me-2"></i>Agent Reports
                     </button>
@@ -1145,7 +1145,40 @@
                                     </div>
                                 </div>
                             </div>
+							
+							<div class="card mt-4">
+								<div class="card-header">
+									<h5 class="mb-0"><i class="fas fa-user-friends me-2"></i>Personnel Management</h5>
+								</div>
+								<div class="card-body">
+									<div class="row">
+										<div class="col-md-6">
+											<h6>Agents</h6>
+											<div class="input-group mb-3">
+												<input type="text" id="newAgentName" class="form-control" placeholder="New agent name...">
+												<button class="btn btn-primary" type="button" onclick="addAgent()">
+													<i class="fas fa-plus me-1"></i> Add
+												</button>
+											</div>
+											<ul id="agentList" class="list-group">
+												</ul>
+										</div>
 
+										<div class="col-md-6">
+											<h6>Executives</h6>
+											<div class="input-group mb-3">
+												<input type="text" id="newExecutiveName" class="form-control" placeholder="New executive name...">
+												<button class="btn btn-primary" type="button" onclick="addExecutive()">
+													<i class="fas fa-plus me-1"></i> Add
+												</button>
+											</div>
+											<ul id="executiveList" class="list-group">
+												</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+							
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>System Information</h5>
@@ -1273,6 +1306,7 @@
         async function initApp() {
             try {
                 await loadTokenData();
+				loadPersonnelLists();
                 setupEventListeners();
                 updateUIForRole();
                 await loadAgentsList();
@@ -1445,7 +1479,108 @@
 			// Ensure the data table is rendered correctly with the right columns
 			renderDataTable();
 		}
+		// ADD THESE NEW JAVASCRIPT FUNCTIONS
 
+		let agents = [];
+		let executives = [];
+
+		// --- Functions to Load, Save, and Display Personnel ---
+
+		function loadPersonnelLists() {
+			agents = JSON.parse(localStorage.getItem('agents')) || [];
+			executives = JSON.parse(localStorage.getItem('executives')) || [];
+			renderPersonnelLists();
+		}
+
+		function savePersonnelLists() {
+			localStorage.setItem('agents', JSON.stringify(agents));
+			localStorage.setItem('executives', JSON.stringify(executives));
+			renderPersonnelLists();
+			// Refresh the dropdowns throughout the app
+			loadAgentsList();
+			loadExecutivesList();
+		}
+
+		function renderPersonnelLists() {
+			const agentList = document.getElementById('agentList');
+			const executiveList = document.getElementById('executiveList');
+
+			agentList.innerHTML = agents.map((name, index) => `
+				<li class="list-group-item d-flex justify-content-between align-items-center">
+					${name}
+					<div>
+						<button class="btn btn-sm btn-outline-primary" onclick="editAgent(${index})"><i class="fas fa-edit"></i></button>
+						<button class="btn btn-sm btn-outline-danger" onclick="deleteAgent(${index})"><i class="fas fa-trash"></i></button>
+					</div>
+				</li>
+			`).join('');
+
+			executiveList.innerHTML = executives.map((name, index) => `
+				<li class="list-group-item d-flex justify-content-between align-items-center">
+					${name}
+					<div>
+						<button class="btn btn-sm btn-outline-primary" onclick="editExecutive(${index})"><i class="fas fa-edit"></i></button>
+						<button class="btn btn-sm btn-outline-danger" onclick="deleteExecutive(${index})"><i class="fas fa-trash"></i></button>
+					</div>
+				</li>
+			`).join('');
+		}
+
+
+		// --- Functions to Add, Edit, and Delete Agents ---
+
+		function addAgent() {
+			const newName = document.getElementById('newAgentName').value.trim();
+			if (newName && !agents.includes(newName)) {
+				agents.push(newName);
+				savePersonnelLists();
+				document.getElementById('newAgentName').value = '';
+			}
+		}
+
+		function editAgent(index) {
+			const currentName = agents[index];
+			const newName = prompt('Enter the new name for the agent:', currentName);
+			if (newName && newName.trim() !== '' && !agents.includes(newName.trim())) {
+				agents[index] = newName.trim();
+				savePersonnelLists();
+			}
+		}
+
+		function deleteAgent(index) {
+			if (confirm('Are you sure you want to delete this agent?')) {
+				agents.splice(index, 1);
+				savePersonnelLists();
+			}
+		}
+
+		// --- Functions to Add, Edit, and Delete Executives ---
+
+		function addExecutive() {
+			const newName = document.getElementById('newExecutiveName').value.trim();
+			if (newName && !executives.includes(newName)) {
+				executives.push(newName);
+				savePersonnelLists();
+				document.getElementById('newExecutiveName').value = '';
+			}
+		}
+
+		function editExecutive(index) {
+			const currentName = executives[index];
+			const newName = prompt('Enter the new name for the executive:', currentName);
+			if (newName && newName.trim() !== '' && !executives.includes(newName.trim())) {
+				executives[index] = newName.trim();
+				savePersonnelLists();
+			}
+		}
+
+		function deleteExecutive(index) {
+			if (confirm('Are you sure you want to delete this executive?')) {
+				executives.splice(index, 1);
+				savePersonnelLists();
+			}
+		}
+		
         // Convert database field names to frontend format
         function convertFromDatabase(dbItem) {
             return {
@@ -1817,34 +1952,21 @@
             });
         }
 
-        async function loadAgentsList() { 
-			// Get unique agent names
-			const agents = [...new Set(tokenData.map(item => {
-				const converted = convertFromDatabase(item);
-				return converted.agentName;
-			}).filter(Boolean))];
-			
-			// Update all agent dropdowns
+        // REPLACE the old loadAgentsList function with this
+		async function loadAgentsList() {
 			const selectIds = ['filterAgent', 'reportAgent', 'profitAgent'];
 			selectIds.forEach(selectId => {
 				const select = document.getElementById(selectId);
 				if (select) {
 					const currentValue = select.value;
 					select.innerHTML = '<option value="">Select Agent</option>';
-					
-					// Only add "All Agents" option to filter dropdowns, not report dropdowns
-					if (selectId === 'filterAgent' || selectId === 'profitAgent') {
+					if (selectId !== 'reportAgent') {
 						select.innerHTML += '<option value="All">All Agents</option>';
 					}
-					
 					agents.forEach(agent => {
 						select.innerHTML += `<option value="${agent}">${agent}</option>`;
 					});
-					
-					// Try to preserve the current selection
-					if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
-						select.value = currentValue;
-					}
+					select.value = currentValue;
 				}
 			});
 		}
@@ -1939,34 +2061,21 @@
 			}
 		}
 		
-		async function loadExecutivesList() { 
-			// Get unique executive names
-			const executives = [...new Set(tokenData.map(item => {
-				const converted = convertFromDatabase(item);
-				return converted.executiveName;
-			}).filter(Boolean))];
-			
-			// Update executive dropdowns
+		// REPLACE the old loadExecutivesList function with this
+		async function loadExecutivesList() {
 			const selectIds = ['filterExecutive', 'reportExecutive'];
 			selectIds.forEach(selectId => {
 				const select = document.getElementById(selectId);
 				if (select) {
 					const currentValue = select.value;
 					select.innerHTML = '<option value="">Select Executive</option>';
-					
-					// Add "All Executives" option to filter dropdown
 					if (selectId === 'filterExecutive') {
 						select.innerHTML += '<option value="All">All Executives</option>';
 					}
-					
 					executives.forEach(executive => {
 						select.innerHTML += `<option value="${executive}">${executive}</option>`;
 					});
-					
-					// Try to preserve the current selection
-					if (currentValue && Array.from(select.options).some(opt => opt.value === currentValue)) {
-						select.value = currentValue;
-					}
+					select.value = currentValue;
 				}
 			});
 		}
