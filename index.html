@@ -634,99 +634,116 @@
                 </div>
 
                 <div class="tab-pane fade" id="filter-content">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Advanced Token Filtering</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-4">
-                                <div class="col-md-2">
-                                    <label class="form-label">Status</label>
-                                    <select class="form-select" id="filterStatus">
-                                        <option value="">All</option>
-                                        <option value="Completed">Completed</option>
-                                        <option value="Not Completed">Not Completed</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Location</label>
-                                    <select class="form-select" id="filterLocation" onchange="updateFilterLocationField()">
-                                        <option value="">All</option>
-                                        <option value="India">India</option>
-                                        <option value="International">International</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2" id="countryFilterDiv" style="display: none;">
-                                    <label class="form-label">Country</label>
-                                    <select class="form-select" id="filterCountry">
-                                        <option value="">All Countries</option>
-                                        <option value="USA">United States</option>
-                                        <option value="UK">United Kingdom</option>
-                                        <option value="Canada">Canada</option>
-                                        <option value="Australia">Australia</option>
-                                        <option value="Germany">Germany</option>
-                                        <option value="France">France</option>
-                                        <option value="Japan">Japan</option>
-                                        <option value="China">China</option>
-                                        <option value="Singapore">Singapore</option>
-                                        <option value="UAE">United Arab Emirates</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">From Date</label>
-                                    <input type="date" class="form-control" id="filterFromDate">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">To Date</label>
-                                    <input type="date" class="form-control" id="filterToDate">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Agent</label>
-                                    <select class="form-select" id="filterAgent">
-                                        <option value="">All Agents</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <button class="btn btn-primary me-2" onclick="applyFilters()">
-                                        <i class="fas fa-filter me-1"></i>Apply Filters
-                                    </button>
-                                    <button class="btn btn-secondary me-2" onclick="clearFilters()">
-                                        <i class="fas fa-times me-1"></i>Clear Filters
-                                    </button>
-                                    <button class="btn btn-success admin-only user-only" style="display: none;" onclick="exportFilteredData()">
-                                        <i class="fas fa-download me-1"></i>Export Results CSV
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="filteredTable">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Date</th>
-                                            <th>Location</th>
-                                            <th>City/Country</th>
-                                            <th>Token</th>
-                                            <th>Client Name</th>
-                                            <th>Status</th>
-                                            <th class="admin-only-column user-only-column" style="display: none;">Charges</th>
-                                            <th class="admin-only-column user-only-column agent-only-column" style="display: none;">Amount Due</th>
-                                            <th>Agent</th>
-                                            <th>Executive</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="filteredTableBody">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+					<div class="card">
+						<div class="card-header">
+							<h5 class="mb-0"><i class="fas fa-filter me-2"></i>Advanced Token Filtering</h5>
+						</div>
+						<div class="card-body">
+							<div class="row mb-4">
+								<div class="col-md-2">
+									<label class="form-label">Status</label>
+									<select class="form-select" id="filterStatus">
+										<option value="">All</option>
+										<option value="Completed">Completed</option>
+										<option value="Not Completed">Not Completed</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">Location</label>
+									<select class="form-select" id="filterLocation" onchange="updateFilterLocationField()">
+										<option value="">All</option>
+										<option value="India">India</option>
+										<option value="International">International</option>
+									</select>
+								</div>
+								<div class="col-md-2" id="countryFilterDiv" style="display: none;">
+									<label class="form-label">Country</label>
+									<select class="form-select" id="filterCountry">
+										<option value="">All Countries</option>
+										<option value="USA">United States</option>
+										<option value="UK">United Kingdom</option>
+										<option value="Canada">Canada</option>
+										<option value="Australia">Australia</option>
+										<option value="Germany">Germany</option>
+										<option value="France">France</option>
+										<option value="Japan">Japan</option>
+										<option value="China">China</option>
+										<option value="Singapore">Singapore</option>
+										<option value="UAE">United Arab Emirates</option>
+										<option value="Other">Other</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">Date Type</label>
+									<select class="form-select" id="filterDateType">
+										<option value="date">Date Given</option>
+										<option value="completionDate">Completion Date</option>
+									</select>
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">From Date</label>
+									<input type="date" class="form-control" id="filterFromDate">
+								</div>
+								<div class="col-md-2">
+									<label class="form-label">To Date</label>
+									<input type="date" class="form-control" id="filterToDate">
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-md-3">
+									<label class="form-label">Agent</label>
+									<select class="form-select" id="filterAgent">
+										<option value="">All Agents</option>
+									</select>
+								</div>
+								<div class="col-md-3">
+									<label class="form-label">Executive</label>
+									<select class="form-select" id="filterExecutive">
+										<option value="">All Executives</option>
+									</select>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">&nbsp;</label>
+									<div class="d-grid gap-2 d-md-flex">
+										<button class="btn btn-primary me-2" onclick="applyFilters()">
+											<i class="fas fa-filter me-1"></i>Apply Filters
+										</button>
+										<button class="btn btn-secondary me-2" onclick="clearFilters()">
+											<i class="fas fa-times me-1"></i>Clear Filters
+										</button>
+										<button class="btn btn-success admin-only user-only" style="display: none;" onclick="exportFilteredData()">
+											<i class="fas fa-download me-1"></i>Export CSV
+										</button>
+									</div>
+								</div>
+							</div>
+							
+							<div class="table-responsive">
+								<table class="table table-striped" id="filteredTable">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>Date Given</th>
+											<th>Completion Date</th>
+											<th>Location</th>
+											<th>City/Country</th>
+											<th>Token</th>
+											<th>Client Name</th>
+											<th>Status</th>
+											<th class="admin-only-column user-only-column" style="display: none;">Charges</th>
+											<th class="admin-only-column user-only-column agent-only-column" style="display: none;">Amount Due</th>
+											<th>Agent</th>
+											<th>Executive</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody id="filteredTableBody">
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 
                 <div class="tab-pane fade admin-only user-only agent-only" id="agent-content">
                     <div class="card">
@@ -1187,6 +1204,21 @@
         let currentUser = null;
         let currentRole = null;
         const API_BASE_URL = window.location.origin + '/api';
+		
+		// Utility function to format dates as MM-DD-YY
+		function formatDate(dateString) {
+			if (!dateString) return '-';
+			
+			// Handle both ISO format (2025-09-23T00:00:00.000Z) and YYYY-MM-DD format
+			const date = new Date(dateString);
+			if (isNaN(date.getTime())) return dateString; // Return original if invalid
+			
+			const month = String(date.getMonth() + 1).padStart(2, '0');
+			const day = String(date.getDate()).padStart(2, '0');
+			const year = String(date.getFullYear()).slice(-2);
+			
+			return `${month}-${day}-${year}`;
+		}
 
         // Utility function to show loading overlay
         function showLoading() {
@@ -1418,7 +1450,7 @@
                 return `
                     <tr>
                         <td class="text-nowrap">${convertedItem.id}</td>
-                        <td class="text-nowrap">${convertedItem.date}</td>
+                        <td class="text-nowrap">${formatDate(convertedItem.date)}</td>
                         <td class="text-nowrap">${convertedItem.location}</td>
                         <td class="text-nowrap">${convertedItem.token}</td>
                         <td>${convertedItem.clientName}</td>
@@ -1435,8 +1467,8 @@
                 `;
             }).join('');
         }
-
-        // Save token (add or update)
+		
+		// Save token (add or update)
         async function saveToken() {
             const tokenId = document.getElementById('tokenId').value;
             const formData = {
@@ -1586,26 +1618,45 @@
         }
 
         // Apply filters for the filter tab
-        function applyFilters() {
-            const status = document.getElementById('filterStatus').value;
-            const location = document.getElementById('filterLocation').value;
-            const country = document.getElementById('filterCountry').value;
-            const fromDate = document.getElementById('filterFromDate').value;
-            const toDate = document.getElementById('filterToDate').value;
-            const agent = document.getElementById('filterAgent').value;
-            
-            const filteredData = tokenData.filter(item => {
-                const convertedItem = convertFromDatabase(item);
-                return (status ? convertedItem.status === status : true) &&
-                       (location ? convertedItem.location === location : true) &&
-                       (country ? convertedItem.subLocation === country : true) &&
-                       (fromDate ? convertedItem.date >= fromDate : true) &&
-                       (toDate ? convertedItem.date <= toDate : true) &&
-                       (agent ? convertedItem.agentName === agent : true);
-            });
-            
-            renderFilteredTable(filteredData);
-        }
+		function applyFilters() {
+			const status = document.getElementById('filterStatus').value;
+			const location = document.getElementById('filterLocation').value;
+			const country = document.getElementById('filterCountry').value;
+			const dateType = document.getElementById('filterDateType').value;
+			const fromDate = document.getElementById('filterFromDate').value;
+			const toDate = document.getElementById('filterToDate').value;
+			const agent = document.getElementById('filterAgent').value;
+			const executive = document.getElementById('filterExecutive').value;
+			
+			const filteredData = tokenData.filter(item => {
+				const convertedItem = convertFromDatabase(item);
+				const dateField = dateType === 'completionDate' ? convertedItem.completionDate : convertedItem.date;
+				
+				return (status ? convertedItem.status === status : true) &&
+					   (location ? convertedItem.location === location : true) &&
+					   (country ? convertedItem.subLocation === country : true) &&
+					   (fromDate ? dateField >= fromDate : true) &&
+					   (toDate ? dateField <= toDate : true) &&
+					   (agent ? convertedItem.agentName === agent : true) &&
+					   (executive ? convertedItem.executiveName === executive : true);
+			});
+			
+			renderFilteredTable(filteredData);
+		}
+
+		// Clear filters function
+		function clearFilters() {
+			document.getElementById('filterStatus').value = '';
+			document.getElementById('filterLocation').value = '';
+			document.getElementById('filterCountry').value = '';
+			document.getElementById('filterDateType').value = 'date';
+			document.getElementById('filterFromDate').value = '';
+			document.getElementById('filterToDate').value = '';
+			document.getElementById('filterAgent').value = '';
+			document.getElementById('filterExecutive').value = '';
+			updateFilterLocationField();
+			renderFilteredTable([]);
+		}
 
         // Clear filters
         function clearFilters() {
@@ -1620,34 +1671,35 @@
         }
 
         // Render filtered table
-        function renderFilteredTable(data) {
-            const tableBody = document.getElementById('filteredTableBody');
-            tableBody.innerHTML = data.map(item => {
-                const convertedItem = convertFromDatabase(item);
-                const chargesDisplay = convertedItem.charges ? `₹${convertedItem.charges}` : '-';
-                const amountDueDisplay = convertedItem.amountDue ? `₹${convertedItem.amountDue}` : '-';
-                
-                return `
-                    <tr>
-                        <td>${convertedItem.id}</td>
-                        <td>${convertedItem.date}</td>
-                        <td>${convertedItem.location}</td>
-                        <td>${convertedItem.subLocation}</td>
-                        <td>${convertedItem.token}</td>
-                        <td>${convertedItem.clientName}</td>
-                        <td><span class="badge ${convertedItem.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${convertedItem.status}</span></td>
-                        <td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
-                        <td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
-                        <td>${convertedItem.agentName || '-'}</td>
-                        <td>${convertedItem.executiveName || '-'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" onclick="editToken(${convertedItem.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteToken(${convertedItem.id})" title="Delete"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
+		function renderFilteredTable(data) {
+			const tableBody = document.getElementById('filteredTableBody');
+			tableBody.innerHTML = data.map(item => {
+				const convertedItem = convertFromDatabase(item);
+				const chargesDisplay = convertedItem.charges ? `₹${convertedItem.charges}` : '-';
+				const amountDueDisplay = convertedItem.amountDue ? `₹${convertedItem.amountDue}` : '-';
+				
+				return `
+					<tr>
+						<td>${convertedItem.id}</td>
+						<td>${formatDate(convertedItem.date)}</td>
+						<td>${formatDate(convertedItem.completionDate) || '-'}</td>
+						<td>${convertedItem.location}</td>
+						<td>${convertedItem.subLocation}</td>
+						<td>${convertedItem.token}</td>
+						<td>${convertedItem.clientName}</td>
+						<td><span class="badge ${convertedItem.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${convertedItem.status}</span></td>
+						<td class="admin-only-column user-only-column" style="display: ${['admin', 'user'].includes(currentRole) ? '' : 'none'}">${chargesDisplay}</td>
+						<td class="admin-only-column user-only-column agent-only-column" style="display: ${['admin', 'user', 'agent'].includes(currentRole) ? '' : 'none'}">${amountDueDisplay}</td>
+						<td>${convertedItem.agentName || '-'}</td>
+						<td>${convertedItem.executiveName || '-'}</td>
+						<td>
+							<button class="btn btn-sm btn-primary" onclick="editToken(${convertedItem.id})" title="Edit"><i class="fas fa-edit"></i></button>
+							<button class="btn btn-sm btn-danger" onclick="deleteToken(${convertedItem.id})" title="Delete"><i class="fas fa-trash"></i></button>
+						</td>
+					</tr>
+				`;
+			}).join('');
+		}	
 
         // Load unique agents/executives into dropdowns
         function loadUniqueNames(key, selectIds, allOptionText, defaultOptionText) {
@@ -1770,8 +1822,8 @@
                 return `
                     <tr>
                         <td><input type="checkbox" class="agent-checkbox" data-id="${converted.id}"></td>
-                        <td>${converted.date}</td>
-                        <td>${converted.completionDate || '-'}</td>
+                        <td>${formatDate(converted.date)}</td>
+						<td>${formatDate(converted.completionDate) || '-'}</td>
                         <td>${converted.location}</td>
                         <td>${converted.token}</td>
                         <td>${converted.clientName}</td>
@@ -1820,8 +1872,8 @@
                 return `
                     <tr>
                         <td><input type="checkbox" class="executive-checkbox" data-id="${converted.id}"></td>
-                        <td>${converted.date}</td>
-                        <td>${converted.completionDate || '-'}</td>
+                        <td>${formatDate(converted.date)}</td>
+						<td>${formatDate(converted.completionDate) || '-'}</td>
                         <td>${converted.location}</td>
                         <td>${converted.token}</td>
                         <td>${converted.clientName}</td>
@@ -1865,7 +1917,7 @@
                 
                 return `
                     <tr>
-                        <td>${converted.date}</td>
+                        <td>${formatDate(converted.date)}</td>
                         <td>${converted.agentName || '-'}</td>
                         <td>${converted.clientName}</td>
                         <td>${converted.location}</td>
