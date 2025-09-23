@@ -1487,105 +1487,7 @@
 		// ADD THESE NEW JAVASCRIPT FUNCTIONS
 
 		let agents = [];
-		let executives = [];
-
-		// --- Functions to Load, Save, and Display Personnel ---
-
-		function loadPersonnelLists() {
-			agents = JSON.parse(localStorage.getItem('agents')) || [];
-			executives = JSON.parse(localStorage.getItem('executives')) || [];
-			renderPersonnelLists();
-		}
-
-		function savePersonnelLists() {
-			localStorage.setItem('agents', JSON.stringify(agents));
-			localStorage.setItem('executives', JSON.stringify(executives));
-			renderPersonnelLists();
-			// Refresh the dropdowns throughout the app
-			loadAgentsList();
-			loadExecutivesList();
-			populateDataEntryLists();
-		}
-
-		function renderPersonnelLists() {
-			const agentList = document.getElementById('agentList');
-			const executiveList = document.getElementById('executiveList');
-
-			agentList.innerHTML = agents.map((name, index) => `
-				<li class="list-group-item d-flex justify-content-between align-items-center">
-					${name}
-					<div>
-						<button class="btn btn-sm btn-outline-primary" onclick="editAgent(${index})"><i class="fas fa-edit"></i></button>
-						<button class="btn btn-sm btn-outline-danger" onclick="deleteAgent(${index})"><i class="fas fa-trash"></i></button>
-					</div>
-				</li>
-			`).join('');
-
-			executiveList.innerHTML = executives.map((name, index) => `
-				<li class="list-group-item d-flex justify-content-between align-items-center">
-					${name}
-					<div>
-						<button class="btn btn-sm btn-outline-primary" onclick="editExecutive(${index})"><i class="fas fa-edit"></i></button>
-						<button class="btn btn-sm btn-outline-danger" onclick="deleteExecutive(${index})"><i class="fas fa-trash"></i></button>
-					</div>
-				</li>
-			`).join('');
-		}
-
-
-		// --- Functions to Add, Edit, and Delete Agents ---
-
-		function addAgent() {
-			const newName = document.getElementById('newAgentName').value.trim();
-			if (newName && !agents.includes(newName)) {
-				agents.push(newName);
-				savePersonnelLists();
-				document.getElementById('newAgentName').value = '';
-			}
-		}
-
-		function editAgent(index) {
-			const currentName = agents[index];
-			const newName = prompt('Enter the new name for the agent:', currentName);
-			if (newName && newName.trim() !== '' && !agents.includes(newName.trim())) {
-				agents[index] = newName.trim();
-				savePersonnelLists();
-			}
-		}
-
-		function deleteAgent(index) {
-			if (confirm('Are you sure you want to delete this agent?')) {
-				agents.splice(index, 1);
-				savePersonnelLists();
-			}
-		}
-
-		// --- Functions to Add, Edit, and Delete Executives ---
-
-		function addExecutive() {
-			const newName = document.getElementById('newExecutiveName').value.trim();
-			if (newName && !executives.includes(newName)) {
-				executives.push(newName);
-				savePersonnelLists();
-				document.getElementById('newExecutiveName').value = '';
-			}
-		}
-
-		function editExecutive(index) {
-			const currentName = executives[index];
-			const newName = prompt('Enter the new name for the executive:', currentName);
-			if (newName && newName.trim() !== '' && !executives.includes(newName.trim())) {
-				executives[index] = newName.trim();
-				savePersonnelLists();
-			}
-		}
-
-		function deleteExecutive(index) {
-			if (confirm('Are you sure you want to delete this executive?')) {
-				executives.splice(index, 1);
-				savePersonnelLists();
-			}
-		}
+		let executives = [];			
 		
         // Convert database field names to frontend format
         function convertFromDatabase(dbItem) {
@@ -1684,27 +1586,152 @@
             }).join('');
         }
 		
+		// REPLACE ALL THE OLD PERSONNEL FUNCTIONS WITH THIS NEW BLOCK
+
+let agents = [];      // Now stores objects like {id: 1, name: 'Sagar'}
+let executives = [];  // Now stores objects like {id: 1, name: 'Ramnath'}
+
+		// --- Cloud-Based Personnel Management ---
+
+		// Load lists from the server
+		async function loadPersonnelLists() {
+			try {
+				// Fetch both lists at the same time
+				const [agentsData, executivesData] = await Promise.all([
+					apiRequest('/agents'),
+					apiRequest('/executives')
+				]);
+				agents = agentsData;
+				executives = executivesData;
+				
+				// Update all UI components that use these lists
+				renderPersonnelLists();
+				loadAgentsList();
+				loadExecutivesList();
+				populateDataEntryLists();
+			} catch (error) {
+				console.error("Failed to load personnel lists:", error);
+				showAlert('Could not load agent/executive lists from the cloud.', 'danger');
+			}
+		}
+
+		// Render the lists in the Settings tab
+		function renderPersonnelLists() {
+			const agentList = document.getElementById('agentList');
+			const executiveList = document.getElementById('executiveList');
+
+			agentList.innerHTML = agents.map(agent => `
+				<li class="list-group-item d-flex justify-content-between align-items-center">
+					${agent.name}
+					<div>
+						<button class="btn btn-sm btn-outline-primary" onclick="editAgent(${agent.id}, '${agent.name}')"><i class="fas fa-edit"></i></button>
+						<button class="btn btn-sm btn-outline-danger" onclick="deleteAgent(${agent.id})"><i class="fas fa-trash"></i></button>
+					</div>
+				</li>
+			`).join('');
+
+			executiveList.innerHTML = executives.map(executive => `
+				<li class="list-group-item d-flex justify-content-between align-items-center">
+					${executive.name}
+					<div>
+						<button class="btn btn-sm btn-outline-primary" onclick="editExecutive(${executive.id}, '${executive.name}')"><i class="fas fa-edit"></i></button>
+						<button class="btn btn-sm btn-outline-danger" onclick="deleteExecutive(${executive.id})"><i class="fas fa-trash"></i></button>
+					</div>
+				</li>
+			`).join('');
+		}
+
+		// --- Agent CRUD Functions ---
+		async function addAgent() {
+			const newNameInput = document.getElementById('newAgentName');
+			const name = newNameInput.value.trim();
+			if (name) {
+				try {
+					await apiRequest('/agents', {
+						method: 'POST',
+						body: JSON.stringify({ name })
+					});
+					newNameInput.value = '';
+					await loadPersonnelLists(); // Refresh lists from server
+				} catch (error) {
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+
+		async function editAgent(id, currentName) {
+			const newName = prompt('Enter the new name for the agent:', currentName);
+			if (newName && newName.trim() !== '') {
+				try {
+					await apiRequest(`/agents/${id}`, {
+						method: 'PUT',
+						body: JSON.stringify({ name: newName.trim() })
+					});
+					await loadPersonnelLists(); // Refresh lists from server
+				} catch (error) {
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+
+		async function deleteAgent(id) {
+			if (confirm('Are you sure you want to delete this agent?')) {
+				try {
+					await apiRequest(`/agents/${id}`, { method: 'DELETE' });
+					await loadPersonnelLists(); // Refresh lists from server
+				} catch (error) {
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+
+		// --- Executive CRUD Functions ---
+		async function addExecutive() {
+			const newNameInput = document.getElementById('newExecutiveName');
+			const name = newNameInput.value.trim();
+			if (name) {
+				try {
+					await apiRequest('/executives', {
+						method: 'POST',
+						body: JSON.stringify({ name })
+					});
+					newNameInput.value = '';
+					await loadPersonnelLists(); // Refresh lists from server
+				} catch (error) {
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+
+		async function editExecutive(id, currentName) {
+			const newName = prompt('Enter the new name for the executive:', currentName);
+			if (newName && newName.trim() !== '') {
+				try {
+					await apiRequest(`/executives/${id}`, {
+						method: 'PUT',
+						body: JSON.stringify({ name: newName.trim() })
+					});
+					await loadPersonnelLists(); // Refresh lists from server
+				} catch (error) {
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+
+		async function deleteExecutive(id) {
+			if (confirm('Are you sure you want to delete this executive?')) {
+				try {
+					await apiRequest(`/executives/${id}`, { method: 'DELETE' });
+					await loadPersonnelLists(); // Refresh lists from server
+				} catch (error) {
+					showAlert(error.message, 'danger');
+				}
+			}
+		}
+		
 		// Save token (add or update)
-        async function saveToken() {
+		async function saveToken() {
 			const tokenId = document.getElementById('tokenId').value;
-
-			// Check for and add new Agent/Executive names if they don't exist
-			const agentName = document.getElementById('agentName').value.trim();
-			const executiveName = document.getElementById('executiveName').value.trim();
-			let personnelListUpdated = false;
-
-			if (agentName && !agents.includes(agentName)) {
-				agents.push(agentName);
-				personnelListUpdated = true;
-			}
-			if (executiveName && !executives.includes(executiveName)) {
-				executives.push(executiveName);
-				personnelListUpdated = true;
-			}
-
-			if (personnelListUpdated) {
-				savePersonnelLists(); // This saves the new name(s) and updates all dropdowns
-			}
 			
 			// Gather all data from the form
 			const formData = {
@@ -1726,8 +1753,8 @@
 				amountDue: parseFloat(document.getElementById('amountDue').value) || 0,
 				chargesToExecutive: parseFloat(document.getElementById('chargesToExecutive').value) || 0,
 				margin: parseFloat(document.getElementById('margin').value) || 0,
-				agentName: agentName, // Use the variable to ensure it's the trimmed value
-				executiveName: executiveName, // Use the variable to ensure it's the trimmed value
+				agentName: document.getElementById('agentName').value.trim(),
+				executiveName: document.getElementById('executiveName').value.trim(),
 				processBy: document.getElementById('processBy').value
 			};
 			
@@ -1990,7 +2017,7 @@
 						select.innerHTML += '<option value="All">All Agents</option>';
 					}
 					agents.forEach(agent => {
-						select.innerHTML += `<option value="${agent}">${agent}</option>`;
+						select.innerHTML += `<option value="${agent.name}">${agent.name}</option>`;
 					});
 					select.value = currentValue;
 				}
@@ -2099,7 +2126,7 @@
 						select.innerHTML += '<option value="All">All Executives</option>';
 					}
 					executives.forEach(executive => {
-						select.innerHTML += `<option value="${executive}">${executive}</option>`;
+						select.innerHTML += `<option value="${executive.name}">${executive.name}</option>`;
 					});
 					select.value = currentValue;
 				}
@@ -2509,13 +2536,13 @@
 			const executiveDatalist = document.getElementById('executiveDatalist');
 
 			agentDatalist.innerHTML = '';
-			agents.forEach(name => {
-				agentDatalist.innerHTML += `<option value="${name}">`;
+			agents.forEach(agent => {
+				agentDatalist.innerHTML += `<option value="${agent.name}">`;
 			});
 
 			executiveDatalist.innerHTML = '';
-			executives.forEach(name => {
-				executiveDatalist.innerHTML += `<option value="${name}">`;
+			executives.forEach(executive => {
+				executiveDatalist.innerHTML += `<option value="${executive.name}">`;
 			});
 		}
 				
