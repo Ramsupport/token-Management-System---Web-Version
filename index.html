@@ -2436,15 +2436,16 @@
 			renderProfitReport(filteredData);
 		}
 
-		// ✅ CORRECTED renderProfitReport function
+		// ✅ CORRECTED renderProfitReport function with proper revenue calculation
 		function renderProfitReport(data) {
 			const tableBody = document.getElementById('profitTableBody');
 			
 			// Reset summary values
-			let totalRevenue = 0;
-			let totalExpenses = 0;
-			let totalMargin = 0;
+			let totalRevenue = 0;        // Sum of all Charges (what you charged clients)
+			let totalExpenses = 0;       // Sum of all Executive Charges (what you paid out)
+			let totalMargin = 0;         // Sum of all Margins (Charges - Executive Charges)
 			let completedCount = 0;
+			let totalPaymentReceived = 0; // Actual money received
 
 			tableBody.innerHTML = data.map(item => {
 				const converted = convertFromDatabase(item);
@@ -2455,10 +2456,11 @@
 				const margin = parseFloat(converted.margin) || 0;
 				const paymentReceived = parseFloat(converted.paymentReceived) || 0;
 				
-				// Accumulate totals
-				totalRevenue += paymentReceived; // Revenue is what you actually received
-				totalExpenses += executiveCharges; // Expenses are what you paid to executives
-				totalMargin += margin; // Margin is charges - executive charges
+				// ✅ ACCUMULATE TOTALS CORRECTLY:
+				totalRevenue += charges;              // Revenue = Total charges billed
+				totalExpenses += executiveCharges;    // Expenses = Paid to executives
+				totalMargin += margin;                // Margin = Charges - Executive charges
+				totalPaymentReceived += paymentReceived; // Actual cash received
 				if (converted.status === 'Completed') completedCount++;
 				
 				// Get currency symbol from settings
@@ -2479,14 +2481,14 @@
 			}).join('');
 			
 			// ✅ CORRECT SUMMARY CALCULATIONS:
-			const netProfit = totalMargin; // Net profit should be the total margin
+			const netProfit = totalMargin; // Net profit = Total margin
 			const averageMargin = data.length > 0 ? totalMargin / data.length : 0;
 			const completionRate = data.length > 0 ? (completedCount / data.length) * 100 : 0;
 			
 			// Get currency symbol
 			const currencySymbol = document.getElementById('currencySymbol')?.value || '₹';
 			
-			// Update summary displays
+			// ✅ UPDATE SUMMARY DISPLAYS CORRECTLY:
 			document.getElementById('totalRevenue').textContent = currencySymbol + totalRevenue.toFixed(2);
 			document.getElementById('totalExpenses').textContent = currencySymbol + totalExpenses.toFixed(2);
 			document.getElementById('netProfit').textContent = currencySymbol + netProfit.toFixed(2);
@@ -2502,7 +2504,6 @@
 				showAlert(`Found ${data.length} records for profit analysis`, 'success');
 			}
 		}
-
         // Mark selected items as completed
         async function markAllCompleted(type) {
             const checkboxes = document.querySelectorAll(`.${type}-checkbox:checked`);
