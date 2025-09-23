@@ -31,7 +31,7 @@ async function initializeDatabase() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS tokens (
         id SERIAL PRIMARY KEY, date DATE, completion_date DATE, location VARCHAR(50), sub_location VARCHAR(100),
-        token VARCHAR(100) UNIQUE, password VARCHAR(255), client_name VARCHAR(255), contact VARCHAR(255),
+        token VARCHAR(100), password VARCHAR(255), client_name VARCHAR(255), contact VARCHAR(255),
         who_will_ship VARCHAR(255), contacted_client VARCHAR(100), status VARCHAR(50), forwarded VARCHAR(50),
         charges DECIMAL(10,2) DEFAULT 0, payment_received DECIMAL(10,2) DEFAULT 0, amount_due DECIMAL(10,2) DEFAULT 0,
         charges_to_executive DECIMAL(10,2) DEFAULT 0, agent_name VARCHAR(255), executive_name VARCHAR(255),
