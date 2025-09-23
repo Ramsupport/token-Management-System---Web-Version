@@ -1311,7 +1311,7 @@
             try {
                 await loadTokenData();
 				loadPersonnelLists();
-				populateDataEntryDropdowns(); 
+				populateDataEntryLists(); 
                 setupEventListeners();
                 updateUIForRole();
                 await loadAgentsList();
@@ -1504,6 +1504,7 @@
 			// Refresh the dropdowns throughout the app
 			loadAgentsList();
 			loadExecutivesList();
+			populateDataEntryLists();
 		}
 
 		function renderPersonnelLists() {
