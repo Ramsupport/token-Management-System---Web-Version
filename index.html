@@ -2075,47 +2075,291 @@
             downloadCSV(csv, 'filtered-data.csv');
         }
 
-        // Create backup from database
-        async function createBackup() {
-            try {
-                const tokens = await apiRequest('/tokens');
-                const users = await apiRequest('/users');
-                
-                const backupData = {
-                    tokens: tokens,
-                    users: users,
-                    settings: {
-                        defaultExecutiveName: document.getElementById('defaultExecutiveName').value,
-                        currencySymbol: document.getElementById('currencySymbol').value
-                    },
-                    backupDate: new Date().toISOString(),
-                    version: '2.0.0'
-                };
-                
-                const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                const dateStr = new Date().toISOString().split('T')[0];
+        // Enhanced Backup Creation
+		async function createBackup() {
+			try {
+				const tokens = await apiRequest('/tokens');
+				const users = await apiRequest('/users');
+				
+				const backupData = {
+					tokens: tokens,
+					users: users,
+					settings: {
+						defaultExecutiveName: document.getElementById('defaultExecutiveName').value,
+						currencySymbol: document.getElementById('currencySymbol').value
+					},
+					backupDate: new Date().toISOString(),
+					version: '2.0.0',
+					totalRecords: tokens.length,
+					backupType: 'full'
+				};
+				
+				// Create downloadable backup file
+				const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+				const link = document.createElement('a');
+				const url = URL.createObjectURL(blob);
+				const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
 
-                link.setAttribute('href', url);
-                link.setAttribute('download', `token-system-backup-${dateStr}.json`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                showAlert('Backup file downloaded successfully', 'success');
-            } catch (error) {
-                console.error('Error creating backup:', error);
-                showAlert('Error creating backup: ' + error.message, 'danger');
-            }
-        }
+				link.setAttribute('href', url);
+				link.setAttribute('download', `token-system-backup-${timestamp}.json`);
+				link.style.visibility = 'hidden';
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+				
+				showAlert(`Backup created successfully! ${tokens.length} tokens backed up.`, 'success');
+				
+			} catch (error) {
+				console.error('Error creating backup:', error);
+				showAlert('Error creating backup: ' + error.message, 'danger');
+			}
+		}
+		
+		// Data validation and cleanup
+		async function validateData() {
+			try {
+				const tokens = await apiRequest('/tokens');
+				let issues = [];
+				
+				tokens.forEach((token, index) => {
+					const converted = convertFromDatabase(token);
+					
+					// Check for required fields
+					if (!converted.date) issues.push(`Token ${token.id}: Missing date`);
+					if (!converted.token) issues.push(`Token ${token.id}: Missing token`);
+					if (!converted.clientName) issues.push(`Token ${token.id}: Missing client name`);
+					
+					// Check data consistency
+					if (converted.charges && converted.paymentReceived && converted.amountDue !== (converted.charges - converted.paymentReceived)) {
+						issues.push(`Token ${token.id}: Amount due calculation mismatch`);
+					}
+				});
+				
+				if (issues.length === 0) {
+					showAlert('Data validation passed! No issues found.', 'success');
+				} else {
+					const issuesText = issues.join('\n');
+					showAlert(`Data validation found ${issues.length} issues:\n${issuesText}`, 'warning');
+				}
+				
+				return issues;
+			} catch (error) {
+				console.error('Error validating data:', error);
+				showAlert('Error validating data: ' + error.message, 'danger');
+			}
+		}
+				
+        // Enhanced Import Data Functionality
+		function importData() {
+			const fileInput = document.createElement('input');
+			fileInput.type = 'file';
+			fileInput.accept = '.json,.csv';
+			fileInput.style.display = 'none';
+			
+			fileInput.onchange = function(e) {
+				const file = e.target.files[0];
+				if (!file) return;
+				
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					try {
+						const content = e.target.result;
+						if (file.name.endsWith('.json')) {
+							handleJsonImport(content, file.name);
+						} else if (file.name.endsWith('.csv')) {
+							handleCsvImport(content, file.name);
+						} else {
+							showAlert('Unsupported file format. Please use JSON or CSV.', 'danger');
+						}
+					} catch (error) {
+						console.error('Error processing file:', error);
+						showAlert('Error processing file: ' + error.message, 'danger');
+					}
+				};
+				reader.readAsText(file);
+			};
+			
+			document.body.appendChild(fileInput);
+			fileInput.click();
+			document.body.removeChild(fileInput);
+		}
 
-        // Import data - note: this is limited to tokens only for cloud version
-        function importData() {
-            showAlert('Import functionality is limited in cloud version. Use the backup/restore feature or contact administrator.', 'info');
-        }
+		// Handle JSON import (backup files)
+		async function handleJsonImport(content, filename) {
+			try {
+				const backupData = JSON.parse(content);
+				
+				// Validate backup structure
+				if (!backupData.tokens && !backupData.version) {
+					throw new Error('Invalid backup file format');
+				}
+				
+				let importSummary = {
+					tokens: 0,
+					users: 0,
+					errors: 0
+				};
+				
+				// Import tokens
+				if (backupData.tokens && Array.isArray(backupData.tokens)) {
+					for (const token of backupData.tokens) {
+						try {
+							await apiRequest('/tokens', {
+								method: 'POST',
+								body: JSON.stringify(token)
+							});
+							importSummary.tokens++;
+						} catch (error) {
+							console.error('Error importing token:', error);
+							importSummary.errors++;
+						}
+					}
+				}
+				
+				// Import users (only if admin)
+				if (backupData.users && Array.isArray(backupData.users) && currentRole === 'admin') {
+					for (const user of backupData.users) {
+						try {
+							// Skip if user already exists
+							const existingUsers = await apiRequest('/users');
+							const userExists = existingUsers.some(u => u.username === user.username);
+							
+							if (!userExists) {
+								await apiRequest('/users', {
+									method: 'POST',
+									body: JSON.stringify({
+										username: user.username,
+										password: user.password || 'default123', // Default password if missing
+										role: user.role || 'User'
+									})
+								});
+								importSummary.users++;
+							}
+						} catch (error) {
+							console.error('Error importing user:', error);
+							importSummary.errors++;
+						}
+					}
+				}
+				
+				// Reload data
+				await loadTokenData();
+				await loadUsersList();
+				
+				showAlert(
+					`Import completed! Tokens: ${importSummary.tokens}, Users: ${importSummary.users}, Errors: ${importSummary.errors}`,
+					'success'
+				);
+				
+			} catch (error) {
+				console.error('Error importing JSON:', error);
+				showAlert('Error importing backup: ' + error.message, 'danger');
+			}
+		}
+
+		// Handle CSV import
+		async function handleCsvImport(content, filename) {
+			try {
+				const lines = content.split('\n').filter(line => line.trim());
+				if (lines.length < 2) {
+					throw new Error('CSV file is empty or has no data rows');
+				}
+				
+				const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+				const records = lines.slice(1).map(line => {
+					const values = line.split(',').map(v => v.replace(/^"|"$/g, '').trim());
+					const record = {};
+					headers.forEach((header, index) => {
+						record[header] = values[index] || '';
+					});
+					return record;
+				});
+				
+				let importSummary = {
+					success: 0,
+					errors: 0
+				};
+				
+				for (const record of records) {
+					try {
+						// Convert CSV record to token format
+						const tokenData = convertCsvToToken(record);
+						if (tokenData) {
+							await apiRequest('/tokens', {
+								method: 'POST',
+								body: JSON.stringify(tokenData)
+							});
+							importSummary.success++;
+						}
+					} catch (error) {
+						console.error('Error importing record:', error);
+						importSummary.errors++;
+					}
+				}
+				
+				await loadTokenData();
+				
+				showAlert(
+					`CSV import completed! Success: ${importSummary.success}, Errors: ${importSummary.errors}`,
+					'success'
+				);
+				
+			} catch (error) {
+				console.error('Error importing CSV:', error);
+				showAlert('Error importing CSV: ' + error.message, 'danger');
+			}
+		}
+
+		// Convert CSV record to token format
+		function convertCsvToToken(csvRecord) {
+			// Map CSV columns to database fields
+			const fieldMap = {
+				'ID': 'id',
+				'Date': 'date',
+				'Completion Date': 'completion_date',
+				'Location': 'location',
+				'City/Country': 'sub_location',
+				'Token': 'token',
+				'Password': 'password',
+				'Client Name': 'client_name',
+				'Contact': 'contact',
+				'Who Will Ship': 'who_will_ship',
+				'Client Status': 'contacted_client',
+				'Status': 'status',
+				'Forwarded': 'forwarded',
+				'Charges': 'charges',
+				'Payment Received': 'payment_received',
+				'Amount Due': 'amount_due',
+				'Executive Charges': 'charges_to_executive',
+				'Agent Name': 'agent_name',
+				'Executive Name': 'executive_name',
+				'Margin': 'margin',
+				'Process By': 'process_by'
+			};
+			
+			const token = {};
+			
+			Object.keys(csvRecord).forEach(csvKey => {
+				const dbField = fieldMap[csvKey];
+				if (dbField && csvRecord[csvKey] !== '') {
+					// Convert numeric fields
+					if (['charges', 'payment_received', 'amount_due', 'charges_to_executive', 'margin'].includes(dbField)) {
+						token[dbField] = parseFloat(csvRecord[csvKey]) || 0;
+					} else {
+						token[dbField] = csvRecord[csvKey];
+					}
+				}
+			});
+			
+			// Set default values for required fields
+			if (!token.date) token.date = new Date().toISOString().split('T')[0];
+			if (!token.status) token.status = 'Not Completed';
+			if (!token.forwarded) token.forwarded = 'Not Done';
+			if (!token.executive_name) token.executive_name = 'Ramnath';
+			
+			return Object.keys(token).length > 0 ? token : null;
+		}
 
         // Clear all data
         function clearAllData() {
