@@ -2179,14 +2179,15 @@
             showAlert('Data refreshed', 'info'); 
         }
 
-        // Initialize app when page loads
+        // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date as default
-            document.getElementById('date').value = new Date().toISOString().split('T')[0];
-            updateSubLocationField();
-            
-            // Check if we can connect to the API
-            checkConnectionStatus();
+            // This attaches the function to your login form's submit button
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Stop the page from reloading
+                handleLogin();      // Call your login logic
+            });
+
+            // You can add other startup event listeners here too
         });
     </script>
 </body>
