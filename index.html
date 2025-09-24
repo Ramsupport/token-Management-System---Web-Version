@@ -798,7 +798,7 @@
 							<div class="row mb-3">
 								<div class="col-12">
 									<div class="btn-group" role="group">
-										<button class="btn btn-success admin-only user-only" style="display: none;" onclick="bulkApplyAgentPayment()">
+										<button class="btn btn-success admin-only user-only" style="display: none;" onclick="bulkApplyFullPayment('agent')">
 											<i class="fas fa-money-check-alt me-1"></i>Apply Payment (All)
 										</button>
 										<button class="btn btn-info" onclick="markAllCompleted('agent')">
@@ -884,7 +884,7 @@
 							<div class="row mb-3">
 								<div class="col-12">
 									<div class="btn-group" role="group">
-										<button class="btn btn-success" onclick="bulkApplyExecutivePayment()">
+										<button class="btn btn-success" onclick="bulkApplyExecutivePaymentEnhanced()>
 											<i class="fas fa-money-check-alt me-1"></i>Apply Payment (All)
 										</button>
 										<button class="btn btn-info" onclick="markAllCompleted('executive')">
@@ -1543,6 +1543,254 @@
 
 			} catch (error) {
 				showAlert('Error: ' + error.message, 'danger');
+			}
+		}
+		
+		// ✅ CORRECTED Bulk Payment Functions
+		async function bulkApplyAgentPayment() {
+			const checkboxes = document.querySelectorAll('.agent-checkbox:checked');
+			if (checkboxes.length === 0) return showAlert('Please select at least one item', 'warning');
+
+			if (confirm(`Apply full payment to ${checkboxes.length} selected agent items? This will mark them as paid.`)) {
+				try {
+					for (const checkbox of checkboxes) {
+						const id = parseInt(checkbox.dataset.id);
+						const item = tokenData.find(t => t.id === id);
+						if (item) {
+							const converted = convertFromDatabase(item);
+							
+							// AUTO-CALCULATION: Payment = Charges (client pays full amount)
+							const paymentAmount = parseFloat(converted.charges) || 0;
+							
+							converted.paymentReceived = paymentAmount;
+							converted.amountDue = 0; // No due amount after full payment
+							converted.status = 'Completed';
+							
+							if (!converted.completionDate) {
+								converted.completionDate = new Date().toISOString().split('T')[0];
+							}
+							
+							const dbData = convertToDatabase(converted);
+							await apiRequest(`/tokens/${id}`, {
+								method: 'PUT',
+								body: JSON.stringify(dbData)
+							});
+						}
+					}
+					
+					await loadTokenData();
+					generateAgentReport();
+					showAlert(`Full payment applied to ${checkboxes.length} agent items`, 'success');
+				} catch (error) {
+					console.error('Error applying agent payments:', error);
+					showAlert('Error applying payments: ' + error.message, 'danger');
+				}
+			}
+		}
+
+		async function bulkApplyExecutivePayment() {
+			const checkboxes = document.querySelectorAll('.executive-checkbox:checked');
+			if (checkboxes.length === 0) return showAlert('Please select at least one item', 'warning');
+
+			if (confirm(`Apply executive payment to ${checkboxes.length} selected items? This will mark executives as paid.`)) {
+				try {
+					for (const checkbox of checkboxes) {
+						const id = parseInt(checkbox.dataset.id);
+						const item = tokenData.find(t => t.id === id);
+						if (item) {
+							const converted = convertFromDatabase(item);
+							
+							// For executives: We pay them their charges
+							// This doesn't affect client payment, just marks executive as paid
+							// We'll use a different field or status to track executive payment
+							
+							// Option 1: Use a custom field (you might need to add this to your database)
+							// converted.executivePaid = true;
+							// converted.executivePaymentDate = new Date().toISOString().split('T')[0];
+							
+							// Option 2: For now, let's just mark as completed and add a note
+							converted.status = 'Completed';
+							if (!converted.completionDate) {
+								converted.completionDate = new Date().toISOString().split('T')[0];
+							}
+							
+							// Add a note that executive has been paid
+							converted.contactedClient = 'Executive Paid - ' + (converted.contactedClient || '');
+							
+							const dbData = convertToDatabase(converted);
+							await apiRequest(`/tokens/${id}`, {
+								method: 'PUT',
+								body: JSON.stringify(dbData)
+							});
+						}
+					}
+					
+					await loadTokenData();
+					generateExecutiveReport();
+					showAlert(`Executive payments applied to ${checkboxes.length} items`, 'success');
+				} catch (error) {
+					console.error('Error applying executive payments:', error);
+					showAlert('Error applying executive payments: ' + error.message, 'danger');
+				}
+			}
+		}
+
+		// ✅ ENHANCED VERSION with executive payment tracking
+		async function bulkApplyExecutivePaymentEnhanced() {
+			const checkboxes = document.querySelectorAll('.executive-checkbox:checked');
+			if (checkboxes.length === 0) return showAlert('Please select at least one item', 'warning');
+
+			// Show payment summary
+			let totalPayment = 0;
+			const executiveSummary = {};
+			
+			checkboxes.forEach(checkbox => {
+				const id = parseInt(checkbox.dataset.id);
+				const item = tokenData.find(t => t.id === id);
+				if (item) {
+					const converted = convertFromDatabase(item);
+					const executiveCharge = parseFloat(converted.chargesToExecutive) || 0;
+					totalPayment += executiveCharge;
+					
+					if (!executiveSummary[converted.executiveName]) {
+						executiveSummary[converted.executiveName] = 0;
+					}
+					executiveSummary[converted.executiveName] += executiveCharge;
+				}
+			});
+			
+			let summaryText = `Total Payment: ₹${totalPayment.toFixed(2)}\n\n`;
+			Object.keys(executiveSummary).forEach(executive => {
+				summaryText += `${executive}: ₹${executiveSummary[executive].toFixed(2)}\n`;
+			});
+			
+			if (confirm(`Apply executive payments?\n\n${summaryText}\n\nThis will mark selected items as completed.`)) {
+				try {
+					for (const checkbox of checkboxes) {
+						const id = parseInt(checkbox.dataset.id);
+						const item = tokenData.find(t => t.id === id);
+						if (item) {
+							const converted = convertFromDatabase(item);
+							
+							// Mark as completed and track executive payment
+							converted.status = 'Completed';
+							if (!converted.completionDate) {
+								converted.completionDate = new Date().toISOString().split('T')[0];
+							}
+							
+							// Add executive payment note
+							const paymentNote = `Exec Paid: ₹${(parseFloat(converted.chargesToExecutive) || 0).toFixed(2)}`;
+							converted.contactedClient = paymentNote + ' - ' + (converted.contactedClient || '');
+							
+							const dbData = convertToDatabase(converted);
+							await apiRequest(`/tokens/${id}`, {
+								method: 'PUT',
+								body: JSON.stringify(dbData)
+							});
+						}
+					}
+					
+					await loadTokenData();
+					generateExecutiveReport();
+					showAlert(`Executive payments applied! Total: ₹${totalPayment.toFixed(2)}`, 'success');
+				} catch (error) {
+					console.error('Error applying executive payments:', error);
+					showAlert('Error applying executive payments: ' + error.message, 'danger');
+				}
+			}
+		}
+
+		// ✅ UPDATE THE BUTTON CLICK HANDLERS
+		// Replace the existing button onclick handlers with these:
+
+		// In your HTML, update the buttons:
+		// Change this line for Agent Reports:
+		// FROM: onclick="bulkApplyAgentPayment()"
+		// TO: onclick="bulkApplyFullPayment('agent')"
+
+		// Change this line for Executive Reports:  
+		// FROM: onclick="bulkApplyExecutivePayment()"
+		// TO: onclick="bulkApplyExecutivePaymentEnhanced()"
+
+		// ✅ SIMPLIFIED VERSION - Use this for both agent and executive
+		async function bulkApplyFullPayment(type) {
+			const checkboxes = document.querySelectorAll(`.${type}-checkbox:checked`);
+			if (checkboxes.length === 0) return showAlert(`Please select at least one ${type} item`, 'warning');
+
+			let totalAmount = 0;
+			const paymentSummary = {};
+			
+			// Calculate totals
+			checkboxes.forEach(checkbox => {
+				const id = parseInt(checkbox.dataset.id);
+				const item = tokenData.find(t => t.id === id);
+				if (item) {
+					const converted = convertFromDatabase(item);
+					let amount = 0;
+					
+					if (type === 'agent') {
+						amount = parseFloat(converted.charges) || 0; // Client pays charges
+					} else {
+						amount = parseFloat(converted.chargesToExecutive) || 0; // We pay executive charges
+					}
+					
+					totalAmount += amount;
+					
+					const name = type === 'agent' ? converted.agentName : converted.executiveName;
+					if (name && !paymentSummary[name]) {
+						paymentSummary[name] = 0;
+					}
+					if (name) paymentSummary[name] += amount;
+				}
+			});
+			
+			const paymentType = type === 'agent' ? 'client payment' : 'executive payment';
+			let summaryText = `Total ${paymentType}: ₹${totalAmount.toFixed(2)}\n\n`;
+			
+			Object.keys(paymentSummary).forEach(name => {
+				summaryText += `${name}: ₹${paymentSummary[name].toFixed(2)}\n`;
+			});
+			
+			if (confirm(`Apply ${paymentType}?\n\n${summaryText}\n\nThis will mark items as completed.`)) {
+				try {
+					for (const checkbox of checkboxes) {
+						const id = parseInt(checkbox.dataset.id);
+						const item = tokenData.find(t => t.id === id);
+						if (item) {
+							const converted = convertFromDatabase(item);
+							
+							if (type === 'agent') {
+								// Agent payment: Client pays full charges
+								converted.paymentReceived = parseFloat(converted.charges) || 0;
+								converted.amountDue = 0;
+							} else {
+								// Executive payment: Track that we paid the executive
+								const paymentNote = `Exec Paid: ₹${(parseFloat(converted.chargesToExecutive) || 0).toFixed(2)}`;
+								converted.contactedClient = paymentNote + ' - ' + (converted.contactedClient || '');
+							}
+							
+							converted.status = 'Completed';
+							if (!converted.completionDate) {
+								converted.completionDate = new Date().toISOString().split('T')[0];
+							}
+							
+							const dbData = convertToDatabase(converted);
+							await apiRequest(`/tokens/${id}`, {
+								method: 'PUT',
+								body: JSON.stringify(dbData)
+							});
+						}
+					}
+					
+					await loadTokenData();
+					if (type === 'agent') generateAgentReport();
+					else generateExecutiveReport();
+					
+					showAlert(`${paymentType} applied! Total: ₹${totalAmount.toFixed(2)}`, 'success');
+				} catch (error) {
+					console.error(`Error applying ${paymentType}:`, error);
+					showAlert(`Error applying ${paymentType}: ` + error.message, 'danger');
+				}
 			}
 		}
 
