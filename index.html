@@ -2977,7 +2977,7 @@
 			showAlert('Agent report exported (Excel-friendly format)', 'success');
 		}
 
-		// ✅ FIXED exportExecutiveReport function
+		// REPLACE your existing function with this one
 		function exportExecutiveReport() {
 			const executive = document.getElementById('reportExecutive').value;
 			if (!executive) return showAlert('Please generate an executive report first', 'warning');
@@ -2989,7 +2989,8 @@
 			
 			if (filteredData.length === 0) return showAlert('No data to export for this executive.', 'warning');
 
-			const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Client Name', 'Executive Charges', 'Margin', 'Status', 'Payment Applied'];
+			// "Margin" has been removed from this list of headers
+			const headers = ['Date', 'Completion Date', 'Location', 'Token', 'Client Name', 'Executive Charges', 'Status', 'Payment Applied'];
 			const csvContent = [
 				headers.join(','),
 				...filteredData.map(item => {
@@ -3000,8 +3001,8 @@
 						`"${converted.location}"`,
 						`"${converted.token}"`,
 						`"${converted.clientName}"`,
-						(converted.chargesToExecutive || 0).toString(), // Numbers only
-						(converted.margin || 0).toString(), // Numbers only
+						(converted.chargesToExecutive || 0).toString(),
+						// The line for margin data has been removed
 						`"${converted.status}"`,
 						converted.paymentReceived ? 'Yes' : 'No'
 					].join(',');
@@ -3009,7 +3010,7 @@
 			].join('\n');
 			
 			downloadCSV(csvContent, `executive-report-${executive}.csv`);
-			showAlert('Executive report exported (Excel-friendly format)', 'success');
+			showAlert('Executive report exported successfully', 'success');
 		}
 
         // Enhanced Backup Creation
